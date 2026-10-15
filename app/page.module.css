@@ -271,7 +271,7 @@
   margin-bottom: var(--space-6);
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 1rem;
 }
 
 .sectionTitle {
@@ -308,20 +308,22 @@
 }
 
 .featureCard {
-  background-color: var(--color-surface-container-high);
+  background-color: var(--color-surface-container-lowest);
   border: 1px solid var(--color-outline-variant);
   border-radius: var(--radius-md);
   padding: var(--space-5);
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.02);
   transition: transform var(--motion-duration-fast) var(--motion-ease-standard),
-              border-color var(--motion-duration-fast) var(--motion-ease-standard);
+              border-color var(--motion-duration-fast) var(--motion-ease-standard),
+              box-shadow var(--motion-duration-fast) var(--motion-ease-standard);
 }
 
 .featureCard:hover {
   border-color: var(--color-secondary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .cardNumber {
