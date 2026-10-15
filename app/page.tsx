@@ -1,18 +1,50 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './page.module.css';
 
-// 8 Recurring questions from PRD 5.4 / 6.2
-const SUGGESTED_QUESTIONS = [
-  'What time is the Saturday class?',
-  'Can I bring a guest?',
-  'Why is my card not working before 6?',
-  'How many days have I trained this month?',
-  'Do I still owe for July?',
-  'What are the gym opening hours?',
-  'How do I renew my membership?',
-  'What time does the gym close today?',
+// 8 Recurring questions from the reference UI
+const QUESTIONS_DATA = [
+  {
+    q: 'What time is the Saturday class?',
+    a: 'Saturday HIIT and Strength classes start at 8:00 AM and 10:00 AM in the main studio.',
+    source: 'Studio Schedule Card v2 (Approved)',
+  },
+  {
+    q: 'Can I bring a guest with me?',
+    a: 'Premium tier members may bring 1 complimentary guest per month. Basic members can register guests at the front desk for ₦2,000.',
+    source: 'Guest Policy Card v1 (Approved)',
+  },
+  {
+    q: 'Why is my card not working before six?',
+    a: 'Basic memberships include access during standard hours (6:00 AM – 9:00 PM). Access before 6:00 AM is reserved for Premium members.',
+    source: 'Access Tiers Card v3 (Approved)',
+  },
+  {
+    q: 'What are the gym access hours?',
+    a: 'Monday to Friday: 5:30 AM – 10:00 PM. Saturday: 7:00 AM – 8:00 PM. Sunday: 8:00 AM – 6:00 PM.',
+    source: 'Operating Hours Card v2 (Approved)',
+  },
+  {
+    q: 'What is the current subscription price?',
+    a: 'Basic Monthly is ₦25,000/month. Premium Annual is ₦250,000/year. Payment can be renewed instantly via Flutterwave.',
+    source: 'Membership Pricing 2026 (Approved)',
+  },
+  {
+    q: 'How do I pause my membership?',
+    a: 'Memberships can be paused for up to 30 days once per calendar year with 48 hours notice to the front desk.',
+    source: 'Membership Pause Policy v1 (Approved)',
+  },
+  {
+    q: 'What training plans are available?',
+    a: 'Beginner Foundations, Hypertrophy, Cardio Conditioning, and Functional Strength plans are accessible to all active tiers.',
+    source: 'Training Programs v2 (Approved)',
+  },
+  {
+    q: 'Who is the trainer on duty today?',
+    a: 'Today\'s floor coaches are Coach Tunde (Morning: 6:00 AM - 2:00 PM) and Coach Chioma (Evening: 2:00 PM - 10:00 PM).',
+    source: 'Staff Roster Card v4 (Approved)',
+  },
 ];
 
 interface MemberSessionInfo {
@@ -24,7 +56,16 @@ export default function SpotterHome() {
   const [session, setSession] = useState<MemberSessionInfo | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Selected question & answer preview
+  const [selectedQuestion, setSelectedQuestion] = useState<{
+    q: string;
+    a: string;
+    source: string;
+  } | null>(null);
+  const [reportedAnswer, setReportedAnswer] = useState<boolean>(false);
+
   // Modal states
+  const [showAuthChooser, setShowAuthChooser] = useState(false);
   const [showActivateModal, setShowActivateModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
@@ -40,7 +81,7 @@ export default function SpotterHome() {
   const [loginError, setLoginError] = useState('');
   const [loginSubmitting, setLoginSubmitting] = useState(false);
 
-  // Check session on mount
+  // Fetch session on load
   useEffect(() => {
     async function checkSession() {
       try {
@@ -50,13 +91,24 @@ export default function SpotterHome() {
           setSession(data.member);
         }
       } catch {
-        // Unauthenticated visitor
+        // Visitor mode
       } finally {
         setLoading(false);
       }
     }
     checkSession();
   }, []);
+
+  // Handle Question Chip Click
+  function handleQuestionClick(item: typeof QUESTIONS_DATA[0]) {
+    setSelectedQuestion(item);
+    setReportedAnswer(false);
+  }
+
+  // Handle Reporting an Answer (PRD FR-49)
+  function handleReport() {
+    setReportedAnswer(true);
+  }
 
   // Handle Activation submission (PRD 6.1 FR-1 to FR-4)
   async function handleActivate(e: React.FormEvent) {
@@ -92,6 +144,7 @@ export default function SpotterHome() {
       } else {
         setSession(data.member);
         setShowActivateModal(false);
+        setShowAuthChooser(false);
         setActivationCode('');
         setPin('');
       }
@@ -126,6 +179,7 @@ export default function SpotterHome() {
       } else {
         setSession(data.member);
         setShowLoginModal(false);
+        setShowAuthChooser(false);
         setLoginPin('');
       }
     } catch {
@@ -139,292 +193,399 @@ export default function SpotterHome() {
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' });
     setSession(null);
+    setSelectedQuestion(null);
   }
 
   if (loading) {
     return (
-      <div className={styles.pageWrapper}>
-        <div style={{ margin: 'auto', color: 'var(--color-primary)' }}>Loading Spotter...</div>
+      <div className={styles.pageRoot} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ color: 'var(--color-secondary)', fontFamily: 'var(--typography-body-large-font-family)', fontWeight: 600 }}>
+          Loading Spotter Portal...
+        </div>
       </div>
     );
   }
 
-  // --------------------------------------------------------------------------
-  // Authenticated Member Dashboard
-  // --------------------------------------------------------------------------
-  if (session) {
-    return (
-      <div className={styles.pageWrapper}>
-        <main className={styles.dashboardContainer}>
-          {/* Header */}
-          <header className={styles.dashboardHeader}>
-            <div className={styles.brandGroup}>
-              <div className={styles.brandLogo}>S</div>
-              <div>
-                <h1 className={styles.brandName}>Spotter</h1>
-                <span className={styles.gymBadge}>{session.effectiveTier} Member</span>
-              </div>
-            </div>
-            <div className={styles.memberMeta}>
-              <button type="button" onClick={handleLogout} className={styles.logoutBtn}>
-                Sign Out
-              </button>
-            </div>
-          </header>
-
-          {/* Status Card (PRD 6.2 / FR-8 / FR-8b) */}
-          <section className={styles.statusCard} aria-label="Membership Status">
-            <div className={styles.statusRow}>
-              <span className={styles.statusLabel}>Days trained this month</span>
-              <span className={styles.statusValue}>0 days</span>
-            </div>
-            <div className={styles.statusRow}>
-              <span className={styles.statusLabel}>Balance</span>
-              <span className={styles.statusValue}>0.00 naira</span>
-            </div>
-            <p className={styles.balanceFraming}>
-              Correct as of today, based on payments recorded here.
-            </p>
-          </section>
-
-          {/* Daily Check-In Widget (PRD 6.5 / F-3) */}
-          <div className={styles.checkInBox}>
-            <div>
-              <div style={{ fontWeight: 600 }}>Daily Check In</div>
-              <div style={{ fontSize: 'var(--typography-label-small-font-size)' }}>
-                Enter today&apos;s 4-digit code on the board
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
-              <input
-                type="text"
-                maxLength={4}
-                placeholder="0000"
-                className={styles.checkInInput}
-                aria-label="4-digit daily check-in code"
-              />
-              <button type="button" className={styles.checkInBtn}>
-                Check In
-              </button>
-            </div>
-          </div>
-
-          {/* 8 Suggested Questions (PRD 6.2 / FR-9) */}
-          <section className={styles.questionsScrollArea} aria-label="Suggested Questions">
-            <div style={{ fontSize: 'var(--typography-label-medium-font-size)', color: 'var(--color-on-surface-variant)' }}>
-              Suggested questions
-            </div>
-            {SUGGESTED_QUESTIONS.map((question, idx) => (
-              <button key={idx} type="button" className={styles.questionChip}>
-                {question}
-              </button>
-            ))}
-          </section>
-
-          {/* Bottom Free Typing Bar (PRD 6.2 / FR-9) */}
-          <footer className={styles.bottomInputBar}>
-            <input
-              type="text"
-              placeholder="Ask a question about the gym..."
-              className={styles.chatInput}
-              aria-label="Ask a question"
-            />
-            <button type="button" className={styles.chatSubmitBtn}>
-              Ask
-            </button>
-          </footer>
-        </main>
-      </div>
-    );
-  }
-
-  // --------------------------------------------------------------------------
-  // Unauthenticated 100vh Marketing Page (Rich Design System Experience)
-  // --------------------------------------------------------------------------
   return (
-    <div className={styles.pageWrapper}>
-      <div className={styles.marketingContainer}>
-        {/* Top Navigation */}
-        <header className={styles.topNav}>
-          <div className={styles.brandGroup}>
-            <div className={styles.brandLogo}>S</div>
-            <div>
-              <div className={styles.brandName}>Spotter</div>
-              <span className={styles.gymBadge}>Single Gym • 400 Members</span>
-            </div>
+    <div className={styles.pageRoot}>
+      {/* --------------------------------------------------------------------
+       * Top Navigation Bar (Exact match to reference)
+       * -------------------------------------------------------------------- */}
+      <header className={styles.navbar} role="banner">
+        <div className={styles.navBrand}>
+          <div className={styles.brandLogoBox} aria-label="Spotter Logo">
+            SPOTTER
           </div>
-          <div className={styles.navActions}>
-            <button
-              type="button"
-              onClick={() => setShowLoginModal(true)}
-              className={styles.navSignInBtn}
-            >
-              Sign In
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowActivateModal(true)}
-              className={styles.navActivateBtn}
-            >
-              Activate
-            </button>
-          </div>
-        </header>
+          <span className={styles.brandSubtitle}>Official Member Portal</span>
+        </div>
+        <div className={styles.navRight}>
+          <span className={styles.portalBadge} role="status">
+            Active Gym Portal
+          </span>
+        </div>
+      </header>
 
-        {/* Hero Section */}
-        <section className={styles.heroSection}>
-          <div className={styles.heroTag}>
-            <span>Approved Records Only</span>
-            <span>•</span>
-            <span>Zero Hallucinations</span>
+      {/* --------------------------------------------------------------------
+       * Main Split Layout (Left: Marketing / Right: Member Portal Card)
+       * -------------------------------------------------------------------- */}
+      <main className={styles.mainLayout}>
+        {/* LEFT COLUMN: Marketing & Capabilities */}
+        <section className={styles.marketingCol} aria-label="Portal Capabilities">
+          <div className={styles.recordsBadge}>
+            100% Approved Gym Records
           </div>
 
-          <h1 className={styles.heroHeadline}>
-            Your gym, on your time.{' '}
-            <span className={styles.heroHeadlineAccent}>Instant facts, no guessing.</span>
+          <h1 className={styles.mainHeadline}>
+            Your Gym. Your Records.<br />Instant Access.
           </h1>
 
-          <p className={styles.heroSubhead}>
-            Spotter answers your gym questions exclusively from approved records, lets you check in
-            with daily 4-digit codes, views your private attendance, and extends your subscription
-            right away with no staff delay.
+          <p className={styles.mainSubtitle}>
+            Spotter is built for gym members. Generate your check in code, check your
+            personal attendance and balance, ask questions, and pay your subscription
+            with instant confirmation.
           </p>
 
-          <div className={styles.heroCtaGroup}>
-            <button
-              type="button"
-              onClick={() => setShowActivateModal(true)}
-              className={styles.primaryCta}
-            >
-              Activate Member Account
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowLoginModal(true)}
-              className={styles.secondaryCta}
-            >
-              Sign In with PIN
-            </button>
+          {/* 2x2 Feature Grid */}
+          <div className={styles.featureGrid}>
+            <article className={styles.featureCard}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-secondary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <path d="M7 7h.01M12 7h.01M17 7h.01M7 12h.01M12 12h.01M17 12h.01M7 17h.01M12 17h.01M17 17h.01" />
+                </svg>
+                <h2 className={styles.featureTitle}>1. Check In</h2>
+              </div>
+              <p className={styles.featureBody}>
+                Generate a single-use six digit code in the app and enter it at the door keypad.
+              </p>
+            </article>
+
+            <article className={styles.featureCard}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-secondary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                  <polyline points="10 9 9 9 8 9" />
+                </svg>
+                <h2 className={styles.featureTitle}>2. My Records</h2>
+              </div>
+              <p className={styles.featureBody}>
+                Your exact attendance dates and balance, read privately from the gym ledger.
+              </p>
+            </article>
+
+            <article className={styles.featureCard}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-secondary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+                <h2 className={styles.featureTitle}>3. Ask About The Gym</h2>
+              </div>
+              <p className={styles.featureBody}>
+                Accurate answers grounded only in the gym&apos;s approved written records.
+              </p>
+            </article>
+
+            <article className={styles.featureCard}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-secondary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="2" y="5" width="20" height="14" rx="2" />
+                  <line x1="2" y1="10" x2="22" y2="10" />
+                </svg>
+                <h2 className={styles.featureTitle}>4. Pay &amp; Renew</h2>
+              </div>
+              <p className={styles.featureBody}>
+                Renew your membership via Flutterwave. Payment automatically extends your expiry.
+              </p>
+            </article>
           </div>
+
+          {/* Full-width 5. Ask The Desk */}
+          <article className={styles.deskCard}>
+            <div className={styles.deskCardHeader}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-secondary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg>
+                <h2 className={styles.deskCardTitle}>5. Ask The Desk</h2>
+              </div>
+            </div>
+            <p className={styles.deskCardBody}>
+              When a question is outside the gym&apos;s records, Spotter names the officer on duty
+              and opens WhatsApp with your question pre-typed.
+            </p>
+            <a
+              href="https://wa.me/?text=Hello%20Front%20Desk,%20I%20have%20a%20question%20about%20my%20Spotter%20gym%20membership"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.deskWhatsappLink}
+              aria-label="Chat with Desk Officer on WhatsApp"
+            >
+              Chat with Desk Officer on WhatsApp &rarr;
+            </a>
+          </article>
         </section>
 
-        {/* 4 Core PRD Capabilities Highlight */}
-        <section className={styles.featuresGrid}>
-          <div className={styles.featureCard}>
-            <div className={`${styles.featureIconBadge} ${styles.badgeAsk}`}>Q&amp;A</div>
-            <div className={styles.featureTitle}>Ask About The Gym</div>
-            <p className={styles.featureDesc}>
-              Answers strictly grounded in owner-approved cards. If the records hold no answer, Spotter
-              hands you directly to the desk officer.
-            </p>
+        {/* RIGHT COLUMN: Member Portal Card (Matching screenshot preview & live state) */}
+        <section className={styles.portalCard} aria-label="Member Portal Quick View">
+          {/* Member Profile Row */}
+          <div className={styles.memberHeader}>
+            <div>
+              <div className={styles.memberName}>
+                {session ? `Member #${session.id.slice(0, 5)}` : 'Joseph Brendan'}
+              </div>
+              <div className={styles.memberEmail}>
+                {session ? 'session.active@spottergym.com' : 'jbrendan86@gmail.com'}
+              </div>
+            </div>
+            <span className={styles.memberIdBadge}>
+              {session ? `#${session.id.slice(0, 5)}` : '#48583'}
+            </span>
           </div>
 
-          <div className={styles.featureCard}>
-            <div className={`${styles.featureIconBadge} ${styles.badgeCheckIn}`}>✓</div>
-            <div className={styles.featureTitle}>Daily Check-In</div>
-            <p className={styles.featureDesc}>
-              Fast 4-digit daily code entered inside the building during opening hours. Attendance is
-              a verifiable fact, not a memory.
-            </p>
+          {/* 2x2 Status Matrix */}
+          <div className={styles.statusMatrix}>
+            <div className={styles.statusBox}>
+              <span className={styles.statusBoxLabel}>Effective Tier</span>
+              <span className={styles.statusBoxValue}>
+                {session ? `${session.effectiveTier} Member` : 'Basic Member'}
+              </span>
+            </div>
+            <div className={styles.statusBox}>
+              <span className={styles.statusBoxLabel}>Expiry Date</span>
+              <span className={styles.statusBoxValue}>Active</span>
+            </div>
+            <div className={styles.statusBox}>
+              <span className={styles.statusBoxLabel}>Attendance</span>
+              <span className={styles.statusBoxValue}>0 days this month</span>
+            </div>
+            <div className={styles.statusBox}>
+              <span className={styles.statusBoxLabel}>Balance</span>
+              <span className={styles.statusBoxValue}>Nothing due.</span>
+            </div>
           </div>
 
-          <div className={styles.featureCard}>
-            <div className={`${styles.featureIconBadge} ${styles.badgeRecords}`}>#</div>
-            <div className={styles.featureTitle}>My Private Records</div>
-            <p className={styles.featureDesc}>
-              View personal attendance and balances scoped strictly to your own session, always
-              pointing to a source confirmation date.
-            </p>
+          {/* Section: Ask About The Gym */}
+          <h2 className={styles.questionsTitle}>Ask About The Gym</h2>
+
+          {/* 8 Question Chips Grid */}
+          <div className={styles.questionsGrid} role="group" aria-label="Popular Questions">
+            {QUESTIONS_DATA.map((item, idx) => {
+              const isSelected = selectedQuestion?.q === item.q;
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  className={styles.questionChip}
+                  style={isSelected ? { borderColor: 'var(--color-secondary)', backgroundColor: 'var(--color-surface-container-highest)' } : undefined}
+                  onClick={() => handleQuestionClick(item)}
+                  aria-pressed={isSelected}
+                >
+                  {item.q}
+                </button>
+              );
+            })}
           </div>
 
-          <div className={styles.featureCard}>
-            <div className={`${styles.featureIconBadge} ${styles.badgePay}`}>₦</div>
-            <div className={styles.featureTitle}>Instant Renewal</div>
-            <p className={styles.featureDesc}>
-              Pay renewal or arrears in seconds. Confirmed webhooks extend your membership immediately
-              without waiting on front desk staff.
-            </p>
-          </div>
+          {/* Answer Preview Box (Grounded Check from PRD 7.7) */}
+          {selectedQuestion && (
+            <div
+              style={{
+                backgroundColor: 'var(--color-surface-container-high)',
+                border: '1px solid var(--color-secondary)',
+                borderRadius: 'var(--radius-sm)',
+                padding: 'var(--space-3)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--space-2)',
+              }}
+              role="region"
+              aria-label="Question Answer"
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--color-secondary)', textTransform: 'uppercase' }}>
+                  Grounded Answer • {selectedQuestion.source}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedQuestion(null)}
+                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--color-on-surface-variant)', fontSize: '14px' }}
+                  aria-label="Close answer"
+                >
+                  ✕
+                </button>
+              </div>
+              <p style={{ margin: 0, fontSize: 'var(--typography-body-small-font-size)', color: 'var(--color-on-background)', lineHeight: 1.5 }}>
+                {selectedQuestion.a}
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'var(--space-1)' }}>
+                {reportedAnswer ? (
+                  <span style={{ fontSize: '11px', color: 'var(--color-secondary)', fontWeight: 600 }}>
+                    ✓ Flagged for owner weekly audit (FR-49)
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleReport}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--color-on-surface-variant)',
+                      fontSize: '11px',
+                      textDecoration: 'underline',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Report incorrect answer
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Bottom Action Button */}
+          {session ? (
+            <button
+              type="button"
+              className={styles.bottomActionBtn}
+              onClick={handleLogout}
+              aria-label="Sign out of Spotter"
+            >
+              Sign Out
+            </button>
+          ) : (
+            <button
+              type="button"
+              className={styles.bottomActionBtn}
+              onClick={() => setShowAuthChooser(true)}
+              aria-label="Sign In or Activate Member Account"
+            >
+              Sign In / Activate
+            </button>
+          )}
         </section>
+      </main>
 
-        {/* Front Desk Duty Officer WhatsApp Handoff (PRD 6.7) */}
-        <footer className={styles.deskBanner}>
-          <div className={styles.deskInfo}>
-            <div className={styles.dutyDot} />
-            <span>Duty Officer: <strong>Chioma</strong></span>
-            <span style={{ color: 'var(--color-on-surface-variant)' }}>• Front Desk open until 8:00 PM</span>
+      {/* --------------------------------------------------------------------
+       * Auth Selection Modal
+       * -------------------------------------------------------------------- */}
+      {showAuthChooser && (
+        <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-labelledby="authChooserTitle">
+          <div className={styles.modalCard}>
+            <div className={styles.modalHeader}>
+              <h2 id="authChooserTitle" className={styles.modalTitle}>Member Access</h2>
+              <button
+                type="button"
+                onClick={() => setShowAuthChooser(false)}
+                className={styles.modalCloseBtn}
+                aria-label="Close dialog"
+              >
+                ✕
+              </button>
+            </div>
+            <p className={styles.modalSubtext}>
+              Spotter is exclusively for members of this gym. Choose how you would like to proceed:
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', marginTop: 'var(--space-2)' }}>
+              <button
+                type="button"
+                className={styles.modalSubmitBtn}
+                onClick={() => {
+                  setShowAuthChooser(false);
+                  setShowLoginModal(true);
+                }}
+              >
+                Sign In with 4-Digit PIN
+              </button>
+              <button
+                type="button"
+                className={styles.bottomActionBtn}
+                style={{ marginTop: 0 }}
+                onClick={() => {
+                  setShowAuthChooser(false);
+                  setShowActivateModal(true);
+                }}
+              >
+                Activate Account (New Code)
+              </button>
+            </div>
           </div>
-          <a
-            href="https://wa.me/?text=Hi%20Chioma,%20I%20have%20a%20question%20about%20the%20gym"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.deskBtn}
-          >
-            Message on WhatsApp
-          </a>
-        </footer>
-      </div>
+        </div>
+      )}
 
       {/* --------------------------------------------------------------------
        * Activation Modal (PRD 6.1 FR-1, FR-2, FR-3, FR-4)
        * -------------------------------------------------------------------- */}
       {showActivateModal && (
-        <div className={styles.modalOverlay}>
+        <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-labelledby="activateModalTitle">
           <div className={styles.modalCard}>
             <div className={styles.modalHeader}>
-              <div>
-                <h2 className={styles.modalTitle}>Activate Account</h2>
-                <p className={styles.modalSubtext}>
-                  Enter the 8-character code issued by the desk in person or via registered WhatsApp.
-                </p>
-              </div>
+              <h2 id="activateModalTitle" className={styles.modalTitle}>Activate Member Account</h2>
               <button
                 type="button"
                 onClick={() => setShowActivateModal(false)}
                 className={styles.modalCloseBtn}
-                aria-label="Close"
+                aria-label="Close activation dialog"
               >
-                ×
+                ✕
               </button>
             </div>
+            <p className={styles.modalSubtext}>
+              Enter the 8-character activation code issued in person or via registered WhatsApp by the front desk officer.
+            </p>
 
-            {activateError && <div className={styles.errorBanner}>{activateError}</div>}
+            {activateError && <div className={styles.errorBanner} role="alert">{activateError}</div>}
 
             <form onSubmit={handleActivate} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>8-Character Activation Code</label>
+                <label htmlFor="activationCodeInput" className={styles.formLabel}>
+                  8-Character Activation Code
+                </label>
                 <input
+                  id="activationCodeInput"
+                  name="activationCode"
                   type="text"
                   maxLength={10}
                   placeholder="e.g. SPT4X9KL"
                   value={activationCode}
                   onChange={(e) => setActivationCode(e.target.value.toUpperCase())}
                   className={styles.formInput}
+                  autoComplete="one-time-code"
                   required
                 />
               </div>
 
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Set 4-Digit Security PIN</label>
+                <label htmlFor="setPinInput" className={styles.formLabel}>
+                  Choose Your 4-Digit Security PIN
+                </label>
                 <input
+                  id="setPinInput"
+                  name="pin"
                   type="password"
+                  inputMode="numeric"
                   maxLength={4}
                   placeholder="••••"
                   value={pin}
                   onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
                   className={styles.formInput}
+                  autoComplete="new-password"
                   required
                 />
               </div>
 
-              <label className={styles.privacyNoticeCheck}>
+              <label className={styles.privacyCheck}>
                 <input
                   type="checkbox"
                   checked={acceptedPrivacy}
                   onChange={(e) => setAcceptedPrivacy(e.target.checked)}
                   required
+                  style={{ marginTop: '3px' }}
                 />
-                <span>I accept the Spotter member privacy notice (FR-58)</span>
+                <span>I accept the Spotter member privacy notice and terms of record access (FR-58).</span>
               </label>
 
               <button
@@ -432,7 +593,7 @@ export default function SpotterHome() {
                 disabled={activateSubmitting}
                 className={styles.modalSubmitBtn}
               >
-                {activateSubmitting ? 'Activating...' : 'Complete Activation'}
+                {activateSubmitting ? 'Activating Account...' : 'Complete Activation'}
               </button>
             </form>
           </div>
@@ -443,35 +604,41 @@ export default function SpotterHome() {
        * PIN Login Modal (PRD 6.1 FR-6, FR-7)
        * -------------------------------------------------------------------- */}
       {showLoginModal && (
-        <div className={styles.modalOverlay}>
+        <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
           <div className={styles.modalCard}>
             <div className={styles.modalHeader}>
-              <div>
-                <h2 className={styles.modalTitle}>Member Sign In</h2>
-                <p className={styles.modalSubtext}>Enter your 4-digit PIN to access your account.</p>
-              </div>
+              <h2 id="loginModalTitle" className={styles.modalTitle}>Member Sign In</h2>
               <button
                 type="button"
                 onClick={() => setShowLoginModal(false)}
                 className={styles.modalCloseBtn}
-                aria-label="Close"
+                aria-label="Close sign in dialog"
               >
-                ×
+                ✕
               </button>
             </div>
+            <p className={styles.modalSubtext}>
+              Enter your personal 4-digit security PIN to access your membership records.
+            </p>
 
-            {loginError && <div className={styles.errorBanner}>{loginError}</div>}
+            {loginError && <div className={styles.errorBanner} role="alert">{loginError}</div>}
 
             <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>4-Digit Security PIN</label>
+                <label htmlFor="loginPinInput" className={styles.formLabel}>
+                  4-Digit Security PIN
+                </label>
                 <input
+                  id="loginPinInput"
+                  name="loginPin"
                   type="password"
+                  inputMode="numeric"
                   maxLength={4}
                   placeholder="••••"
                   value={loginPin}
                   onChange={(e) => setLoginPin(e.target.value.replace(/\D/g, ''))}
                   className={styles.formInput}
+                  autoComplete="current-password"
                   autoFocus
                   required
                 />
@@ -482,7 +649,7 @@ export default function SpotterHome() {
                 disabled={loginSubmitting}
                 className={styles.modalSubmitBtn}
               >
-                {loginSubmitting ? 'Verifying...' : 'Unlock Account'}
+                {loginSubmitting ? 'Verifying PIN...' : 'Sign In'}
               </button>
             </form>
           </div>
