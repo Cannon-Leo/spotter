@@ -1,0 +1,4 @@
+# src/server/auth
+# session.ts is the only place the member session cookie is read.
+# Member ID and effective tier come from here, never from a request body.
+

@@ -1,0 +1,3 @@
+# src/server/router
+# rules.ts holds the never answer list, checked before any model call and before retrieval.
+

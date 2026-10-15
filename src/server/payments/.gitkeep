@@ -1,0 +1,3 @@
+# src/server/payments
+# Governs payment processing, idempotency, webhook signature verification, and atomic settlement.
+

@@ -1,0 +1,4 @@
+# src/server/private
+# Reads a member's own private records.
+# Every exported function takes the member ID as its first argument, and logs the read.
+

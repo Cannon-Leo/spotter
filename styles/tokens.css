@@ -1,0 +1,428 @@
+/**
+ * ==============================================================================
+ * Spotter Design System Tokens
+ * Generated automatically from design-tokens.tokens.json
+ *
+ * ARCHITECTURAL GUIDELINES:
+ * 1. PRIMITIVES (--primitive-*):
+ *    Foundational color palettes and key colors.
+ *    DO NOT use primitive variables directly in UI components.
+ *
+ * 2. COLOR ROLES (--color-*):
+ *    Semantic roles (primary, surface, background, error, container, on-*).
+ *    ALWAYS use these variables in UI elements, components, and templates.
+ *    This guarantees that theming and contrast changes apply without breaking
+ *    component styles.
+ *
+ * 3. ELEVATION & SHADOWS (--shadow-*):
+ *    Pre-configured drop shadows for cards, modals, and floating elements.
+ *
+ * 4. TYPOGRAPHY (--typography-* and .type-*):
+ *    Responsive font scale and typography tokens.
+ * ==============================================================================
+ */
+
+:root {
+  /* ==========================================================================
+   * 1. PRIMITIVE KEY COLORS (Private - Do not use in UI components)
+   * ========================================================================== */
+  --primitive-key-primary: #00e3aaff;
+  --primitive-key-secondary: #008f70ff;
+  --primitive-key-tertiary: #75f8d2ff;
+  --primitive-key-neutral: #717975ff;
+  --primitive-key-neutral-variation: #6a7b73ff;
+  --primitive-key-error: #ff1111ff;
+  --primitive-key-warning: #ffa500ff;
+  --primitive-key-accent-complimentary: #e30039ff;
+  --primitive-key-accent: #aa00e3ff;
+
+  /* ==========================================================================
+   * 2. PRIMITIVE COLOR PALETTES (Private - Do not use in UI components)
+   * ========================================================================== */
+  --primitive-palette-primary-0: #000000ff;
+  --primitive-palette-primary-1: #002116ff;
+  --primitive-palette-primary-2: #003828ff;
+  --primitive-palette-primary-3: #00513bff;
+  --primitive-palette-primary-4: #00e3aaff;
+  --primitive-palette-primary-5: #008864ff;
+  --primitive-palette-primary-6: #00a47aff;
+  --primitive-palette-primary-7: #00c291ff;
+  --primitive-palette-primary-8: #00e1a8ff;
+  --primitive-palette-primary-9: #45fec3ff;
+  --primitive-palette-primary-10: #bcffe0ff;
+  --primitive-palette-primary-11: #e7fff1ff;
+  --primitive-palette-primary-12: #f4fff7ff;
+  --primitive-palette-primary-13: #ffffffff;
+  --primitive-palette-secondary-0: #000000ff;
+  --primitive-palette-secondary-1: #002117ff;
+  --primitive-palette-secondary-2: #00382aff;
+  --primitive-palette-secondary-3: #00513eff;
+  --primitive-palette-secondary-4: #008f70ff;
+  --primitive-palette-secondary-6: #2ca282ff;
+  --primitive-palette-secondary-5: #00876aff;
+  --primitive-palette-secondary-7: #4ebe9cff;
+  --primitive-palette-secondary-8: #6cdab7ff;
+  --primitive-palette-secondary-10: #baffe5ff;
+  --primitive-palette-secondary-9: #89f7d2ff;
+  --primitive-palette-secondary-11: #e7fff3ff;
+  --primitive-palette-secondary-12: #f3fff8ff;
+  --primitive-palette-secondary-13: #ffffffff;
+  --primitive-palette-tertiary-0: #000000ff;
+  --primitive-palette-tertiary-2: #00382bff;
+  --primitive-palette-tertiary-1: #002018ff;
+  --primitive-palette-tertiary-3: #005140ff;
+  --primitive-palette-tertiary-7: #32c09dff;
+  --primitive-palette-tertiary-6: #00a483ff;
+  --primitive-palette-tertiary-4: #75f8d2ff;
+  --primitive-palette-tertiary-5: #00876cff;
+  --primitive-palette-tertiary-8: #56dcb8ff;
+  --primitive-palette-tertiary-9: #76f9d3ff;
+  --primitive-palette-tertiary-13: #ffffffff;
+  --primitive-palette-tertiary-11: #e6fff4ff;
+  --primitive-palette-tertiary-10: #b9ffe6ff;
+  --primitive-palette-tertiary-12: #f3fff8ff;
+  --primitive-palette-neutral-0: #000000ff;
+  --primitive-palette-neutral-8: #c0c8c4ff;
+  --primitive-palette-neutral-7: #a5ada9ff;
+  --primitive-palette-neutral-6: #8a938eff;
+  --primitive-palette-neutral-5: #717975ff;
+  --primitive-palette-neutral-4: #717975ff;
+  --primitive-palette-neutral-3: #414845ff;
+  --primitive-palette-neutral-1: #161d1aff;
+  --primitive-palette-neutral-2: #2a322fff;
+  --primitive-palette-neutral-12: #f6fef9ff;
+  --primitive-palette-neutral-13: #ffffffff;
+  --primitive-palette-neutral-10: #ebf3eeff;
+  --primitive-palette-neutral-11: #f3fbf6ff;
+  --primitive-palette-neutral-9: #dce4dfff;
+  --primitive-palette-neutral-var-0: #000000ff;
+  --primitive-palette-neutral-var-13: #ffffffff;
+  --primitive-palette-neutral-var-12: #f4fff8ff;
+  --primitive-palette-neutral-var-11: #ebfef4ff;
+  --primitive-palette-neutral-var-10: #e3f5ebff;
+  --primitive-palette-neutral-var-9: #d5e7ddff;
+  --primitive-palette-neutral-var-8: #b9cbc1ff;
+  --primitive-palette-neutral-var-7: #9eafa6ff;
+  --primitive-palette-neutral-var-6: #83958cff;
+  --primitive-palette-neutral-var-5: #6a7b73ff;
+  --primitive-palette-neutral-var-4: #6a7b73ff;
+  --primitive-palette-neutral-var-3: #3a4a43ff;
+  --primitive-palette-neutral-var-1: #0f1f19ff;
+  --primitive-palette-neutral-var-2: #24342dff;
+  --primitive-palette-error-0: #000000ff;
+  --primitive-palette-error-13: #ffffffff;
+  --primitive-palette-error-12: #fffbffff;
+  --primitive-palette-error-11: #fff8f7ff;
+  --primitive-palette-error-10: #ffedeaff;
+  --primitive-palette-error-9: #ffdad5ff;
+  --primitive-palette-error-8: #ffb4a9ff;
+  --primitive-palette-error-7: #ff8a7aff;
+  --primitive-palette-error-6: #ff5543ff;
+  --primitive-palette-error-5: #ef0009ff;
+  --primitive-palette-error-4: #ff1111ff;
+  --primitive-palette-error-3: #930003ff;
+  --primitive-palette-error-2: #690001ff;
+  --primitive-palette-error-1: #410000ff;
+  --primitive-palette-warning-0: #000000ff;
+  --primitive-palette-warning-7: #ed9900ff;
+  --primitive-palette-warning-6: #c98100ff;
+  --primitive-palette-warning-5: #a66a00ff;
+  --primitive-palette-warning-4: #ffa500ff;
+  --primitive-palette-warning-3: #653e00ff;
+  --primitive-palette-warning-1: #2a1700ff;
+  --primitive-palette-warning-2: #462a00ff;
+  --primitive-palette-warning-10: #ffeedeff;
+  --primitive-palette-warning-11: #fff8f4ff;
+  --primitive-palette-warning-12: #fffbffff;
+  --primitive-palette-warning-8: #ffb95cff;
+  --primitive-palette-warning-9: #ffddb7ff;
+  --primitive-palette-warning-13: #ffffffff;
+  --primitive-palette-accent-accent: #aa00e3ff;
+  --primitive-palette-accent-compliment-accent-compliement: #e30039ff;
+
+  /* ==========================================================================
+   * 3. COLOR ROLES (Public - USE THESE DIRECTLY IN UI COMPONENTS)
+   * ========================================================================== */
+  --color-primary: var(--primitive-palette-primary-4);
+  --color-on-primary: var(--primitive-palette-primary-13);
+  --color-primary-container: var(--primitive-palette-primary-9);
+  --color-on-primary-container: var(--primitive-palette-primary-3);
+  --color-secondary: var(--primitive-palette-secondary-4);
+  --color-on-secondary: var(--primitive-palette-secondary-13);
+  --color-secondary-container: var(--primitive-palette-secondary-9);
+  --color-on-secondary-container: var(--primitive-palette-secondary-3);
+  --color-tertiary: var(--primitive-palette-tertiary-4);
+  --color-on-tertiary: var(--primitive-palette-tertiary-13);
+  --color-tertiary-container: var(--primitive-palette-tertiary-9);
+  --color-on-tertiary-container: var(--primitive-palette-tertiary-3);
+  --color-error: var(--primitive-palette-error-4);
+  --color-on-error: var(--primitive-palette-error-13);
+  --color-error-container: var(--primitive-palette-error-9);
+  --color-on-error-container: var(--primitive-palette-error-3);
+  --color-surface: var(--primitive-palette-neutral-4);
+  --color-on-surface: var(--primitive-palette-neutral-13);
+  --color-surface-variant: var(--primitive-palette-neutral-9);
+  --color-on-surface-variant: var(--primitive-palette-neutral-3);
+  --color-surface-container-highest: var(--primitive-palette-neutral-9);
+  --color-surface-container-high: var(--primitive-palette-neutral-10);
+  --color-surface-container-low: var(--primitive-palette-neutral-11);
+  --color-surface-container: var(--primitive-palette-neutral-12);
+  --color-surface-container-lowest: var(--primitive-palette-neutral-13);
+  --color-inverse-surface: var(--primitive-palette-neutral-2);
+  --color-inverse-on-surface: var(--primitive-palette-neutral-11);
+  --color-surface-tint: var(--primitive-palette-primary-4);
+  --color-outline-color: var(--primitive-palette-neutral-var-8);
+  --color-outline-variant: var(--primitive-palette-neutral-var-9);
+  --color-primary-fixed: var(--primitive-palette-primary-9);
+  --color-on-primary-fixed: var(--primitive-palette-primary-1);
+  --color-primary-fixed-dim: var(--primitive-palette-primary-8);
+  --color-on-primary-fixed-variant: var(--primitive-palette-primary-3);
+  --color-inverse-primary: var(--primitive-palette-primary-8);
+  --color-secondary-fixed: var(--primitive-palette-secondary-9);
+  --color-on-secondary-fixed: var(--color-primary-fixed-dim);
+  --color-secondary-fixed-dim: var(--primitive-palette-secondary-8);
+  --color-on-secondary-fixed-variant: var(--primitive-palette-secondary-3);
+  --color-tertiary-fixed: var(--primitive-palette-tertiary-9);
+  --color-on-tertiary-fixed: var(--primitive-palette-tertiary-1);
+  --color-tertiary-fixed-dim: var(--primitive-palette-tertiary-8);
+  --color-on-tertiary-fixed-variant: var(--primitive-palette-tertiary-3);
+  --color-background: var(--primitive-palette-neutral-12);
+  --color-on-background: var(--primitive-palette-neutral-1);
+  --color-surface-bright: var(--primitive-palette-neutral-12);
+  --color-surface-dim: var(--primitive-palette-neutral-11);
+  --color-scrim: var(--primitive-palette-neutral-0);
+  --color-shadow: var(--primitive-palette-primary-1);
+
+  /* ==========================================================================
+   * 4. ELEVATION & SHADOWS
+   * ========================================================================== */
+  --shadow-soft: 1.5px 6px 30px 0px #00e3aa1f;
+  --shadow-medium: 4px 6px 24px 0px #00e3aa2e;
+  --shadow-hard: 6px 10px 20px 0px #00e3aa33;
+
+  /* ==========================================================================
+   * 5. TYPOGRAPHY VARIABLES
+   * ========================================================================== */
+  --typography-display-large-font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --typography-display-large-font-size: 64px;
+  --typography-display-large-line-height: 96px;
+  --typography-display-large-font-weight: 700;
+  --typography-display-large-letter-spacing: -3px;
+  --typography-display-medium-font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --typography-display-medium-font-size: 50px;
+  --typography-display-medium-line-height: 75px;
+  --typography-display-medium-font-weight: 600;
+  --typography-display-medium-letter-spacing: -3px;
+  --typography-display-small-font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --typography-display-small-font-size: 40px;
+  --typography-display-small-line-height: 60px;
+  --typography-display-small-font-weight: 600;
+  --typography-display-small-letter-spacing: -2px;
+  --typography-headline-large-font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --typography-headline-large-font-size: 32px;
+  --typography-headline-large-line-height: 48px;
+  --typography-headline-large-font-weight: 500;
+  --typography-headline-large-letter-spacing: -1.8px;
+  --typography-headline-medium-font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --typography-headline-medium-font-size: 28px;
+  --typography-headline-medium-line-height: 42px;
+  --typography-headline-medium-font-weight: 500;
+  --typography-headline-medium-letter-spacing: -1.75px;
+  --typography-headline-small-font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --typography-headline-small-font-size: 24px;
+  --typography-headline-small-line-height: 36px;
+  --typography-headline-small-font-weight: 500;
+  --typography-headline-small-letter-spacing: -1.45px;
+  --typography-title-large-font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --typography-title-large-font-size: 22px;
+  --typography-title-large-line-height: 33px;
+  --typography-title-large-font-weight: 500;
+  --typography-title-large-letter-spacing: -1px;
+  --typography-title-medium-font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --typography-title-medium-font-size: 16px;
+  --typography-title-medium-line-height: 24px;
+  --typography-title-medium-font-weight: 500;
+  --typography-title-medium-letter-spacing: -1px;
+  --typography-title-small-font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --typography-title-small-font-size: 14px;
+  --typography-title-small-line-height: 21px;
+  --typography-title-small-font-weight: 500;
+  --typography-title-small-letter-spacing: -0.5px;
+  --typography-body-large-font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --typography-body-large-font-size: 16px;
+  --typography-body-large-line-height: 24px;
+  --typography-body-large-font-weight: 500;
+  --typography-body-large-letter-spacing: -0.85px;
+  --typography-body-medium-font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --typography-body-medium-font-size: 14px;
+  --typography-body-medium-line-height: 21px;
+  --typography-body-medium-font-weight: 500;
+  --typography-body-medium-letter-spacing: -0.85px;
+  --typography-body-small-font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --typography-body-small-font-size: 12px;
+  --typography-body-small-line-height: 18px;
+  --typography-body-small-font-weight: 500;
+  --typography-body-small-letter-spacing: -0.4px;
+  --typography-label-large-font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --typography-label-large-font-size: 14px;
+  --typography-label-large-line-height: 21px;
+  --typography-label-large-font-weight: 500;
+  --typography-label-large-letter-spacing: -0.85px;
+  --typography-label-medium-font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --typography-label-medium-font-size: 12px;
+  --typography-label-medium-line-height: 18px;
+  --typography-label-medium-font-weight: 500;
+  --typography-label-medium-letter-spacing: -0.85px;
+  --typography-label-small-font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --typography-label-small-font-size: 11px;
+  --typography-label-small-line-height: 16.5px;
+  --typography-label-small-font-weight: 500;
+  --typography-label-small-letter-spacing: -0.4px;
+
+  /* ==========================================================================
+   * 6. SPACING, RADIUS & MOTION (Standard 4px Scale Extensions)
+   * ========================================================================== */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  --radius-none: 0px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  --motion-duration-fast: 150ms;
+  --motion-duration-normal: 250ms;
+  --motion-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* ==========================================================================
+ * 7. TYPOGRAPHY UTILITY CLASSES
+ * ========================================================================== */
+.type-display-large {
+  font-family: var(--typography-display-large-font-family);
+  font-size: var(--typography-display-large-font-size);
+  line-height: var(--typography-display-large-line-height);
+  font-weight: var(--typography-display-large-font-weight);
+  letter-spacing: var(--typography-display-large-letter-spacing);
+}
+
+.type-display-medium {
+  font-family: var(--typography-display-medium-font-family);
+  font-size: var(--typography-display-medium-font-size);
+  line-height: var(--typography-display-medium-line-height);
+  font-weight: var(--typography-display-medium-font-weight);
+  letter-spacing: var(--typography-display-medium-letter-spacing);
+}
+
+.type-display-small {
+  font-family: var(--typography-display-small-font-family);
+  font-size: var(--typography-display-small-font-size);
+  line-height: var(--typography-display-small-line-height);
+  font-weight: var(--typography-display-small-font-weight);
+  letter-spacing: var(--typography-display-small-letter-spacing);
+}
+
+.type-headline-large {
+  font-family: var(--typography-headline-large-font-family);
+  font-size: var(--typography-headline-large-font-size);
+  line-height: var(--typography-headline-large-line-height);
+  font-weight: var(--typography-headline-large-font-weight);
+  letter-spacing: var(--typography-headline-large-letter-spacing);
+}
+
+.type-headline-medium {
+  font-family: var(--typography-headline-medium-font-family);
+  font-size: var(--typography-headline-medium-font-size);
+  line-height: var(--typography-headline-medium-line-height);
+  font-weight: var(--typography-headline-medium-font-weight);
+  letter-spacing: var(--typography-headline-medium-letter-spacing);
+}
+
+.type-headline-small {
+  font-family: var(--typography-headline-small-font-family);
+  font-size: var(--typography-headline-small-font-size);
+  line-height: var(--typography-headline-small-line-height);
+  font-weight: var(--typography-headline-small-font-weight);
+  letter-spacing: var(--typography-headline-small-letter-spacing);
+}
+
+.type-title-large {
+  font-family: var(--typography-title-large-font-family);
+  font-size: var(--typography-title-large-font-size);
+  line-height: var(--typography-title-large-line-height);
+  font-weight: var(--typography-title-large-font-weight);
+  letter-spacing: var(--typography-title-large-letter-spacing);
+}
+
+.type-title-medium {
+  font-family: var(--typography-title-medium-font-family);
+  font-size: var(--typography-title-medium-font-size);
+  line-height: var(--typography-title-medium-line-height);
+  font-weight: var(--typography-title-medium-font-weight);
+  letter-spacing: var(--typography-title-medium-letter-spacing);
+}
+
+.type-title-small {
+  font-family: var(--typography-title-small-font-family);
+  font-size: var(--typography-title-small-font-size);
+  line-height: var(--typography-title-small-line-height);
+  font-weight: var(--typography-title-small-font-weight);
+  letter-spacing: var(--typography-title-small-letter-spacing);
+}
+
+.type-body-large {
+  font-family: var(--typography-body-large-font-family);
+  font-size: var(--typography-body-large-font-size);
+  line-height: var(--typography-body-large-line-height);
+  font-weight: var(--typography-body-large-font-weight);
+  letter-spacing: var(--typography-body-large-letter-spacing);
+}
+
+.type-body-medium {
+  font-family: var(--typography-body-medium-font-family);
+  font-size: var(--typography-body-medium-font-size);
+  line-height: var(--typography-body-medium-line-height);
+  font-weight: var(--typography-body-medium-font-weight);
+  letter-spacing: var(--typography-body-medium-letter-spacing);
+}
+
+.type-body-small {
+  font-family: var(--typography-body-small-font-family);
+  font-size: var(--typography-body-small-font-size);
+  line-height: var(--typography-body-small-line-height);
+  font-weight: var(--typography-body-small-font-weight);
+  letter-spacing: var(--typography-body-small-letter-spacing);
+}
+
+.type-label-large {
+  font-family: var(--typography-label-large-font-family);
+  font-size: var(--typography-label-large-font-size);
+  line-height: var(--typography-label-large-line-height);
+  font-weight: var(--typography-label-large-font-weight);
+  letter-spacing: var(--typography-label-large-letter-spacing);
+}
+
+.type-label-medium {
+  font-family: var(--typography-label-medium-font-family);
+  font-size: var(--typography-label-medium-font-size);
+  line-height: var(--typography-label-medium-line-height);
+  font-weight: var(--typography-label-medium-font-weight);
+  letter-spacing: var(--typography-label-medium-letter-spacing);
+}
+
+.type-label-small {
+  font-family: var(--typography-label-small-font-family);
+  font-size: var(--typography-label-small-font-size);
+  line-height: var(--typography-label-small-line-height);
+  font-weight: var(--typography-label-small-font-weight);
+  letter-spacing: var(--typography-label-small-letter-spacing);
+}

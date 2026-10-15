@@ -1,0 +1,4 @@
+# src/server/db
+# Houses the Prisma client instance.
+# Enforces pooled connection (DATABASE_URL) for application operations.
+

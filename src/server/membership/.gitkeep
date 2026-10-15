@@ -1,0 +1,4 @@
+# src/server/membership
+# Holds effectiveStatus() and effectiveTier().
+# INVARIANT: Membership status and effective tier are derived, never stored as columns.
+

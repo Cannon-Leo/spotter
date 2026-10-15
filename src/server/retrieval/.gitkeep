@@ -1,0 +1,6 @@
+# src/server/retrieval
+# search.ts holds the shared card search.
+# Filters on card status, card version status, and effective tier together inside the query before ranking.
+# index-card.ts writes a card's searchable content when approved.
+# INVARIANT: No private model may ever be imported, queried, or referenced under this directory.
+

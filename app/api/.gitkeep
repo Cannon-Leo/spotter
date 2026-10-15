@@ -1,0 +1,4 @@
+# app/api
+# Next.js route handlers live here.
+# INVARIANT: No route handler may import the database client directly.
+
