@@ -41,7 +41,6 @@ const FEATURES = [
 
 export default function SpotterHome() {
   const [session, setSession] = useState<MemberSessionInfo | null>(null);
-  const [loading, setLoading] = useState(true);
 
   // Check session on mount
   useEffect(() => {
@@ -54,8 +53,6 @@ export default function SpotterHome() {
         }
       } catch {
         // Visitor mode
-      } finally {
-        setLoading(false);
       }
     }
     checkSession();
@@ -67,15 +64,7 @@ export default function SpotterHome() {
     setSession(null);
   }
 
-  if (loading) {
-    return (
-      <div className={styles.pageRoot} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ color: 'var(--color-secondary)', fontFamily: 'var(--typography-body-large-font-family)', fontWeight: 600 }}>
-          Loading Spotter...
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className={styles.pageRoot}>
