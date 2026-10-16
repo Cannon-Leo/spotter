@@ -149,18 +149,30 @@
 
 .heroHeadline {
   font-family: var(--typography-display-large-font-family);
-  font-size: 3.5rem;
-  line-height: 1.15;
-  font-weight: 800;
-  letter-spacing: -1.5px;
+  font-size: var(--typography-display-large-font-size);
+  line-height: var(--typography-display-large-line-height);
+  font-weight: var(--typography-display-large-font-weight);
+  letter-spacing: var(--typography-display-large-letter-spacing);
   color: var(--color-on-background);
   margin-bottom: var(--space-4);
+  max-width: 720px;
+}
+
+.heroHeadlineBreak {
+  display: block;
+  white-space: nowrap;
 }
 
 @media (max-width: 768px) {
   .heroHeadline {
-    font-size: 2.5rem;
-    letter-spacing: -1px;
+    font-size: var(--typography-display-medium-font-size);
+    line-height: var(--typography-display-medium-line-height);
+    letter-spacing: var(--typography-display-medium-letter-spacing);
+    max-width: 100%;
+  }
+
+  .heroHeadlineBreak {
+    white-space: normal;
   }
 }
 

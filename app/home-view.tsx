@@ -113,7 +113,8 @@ export default function SpotterHome() {
         {/* Hero Section */}
         <section className={styles.heroSection} aria-label="Introduction">
           <h1 className={styles.heroHeadline}>
-            Your Gym. Your Records.<br />Instant Access.
+            <span>Your Gym. Your Records.</span>
+            <span className={styles.heroHeadlineBreak}>Instant Access.</span>
           </h1>
 
           <p className={styles.heroSubtitle}>
