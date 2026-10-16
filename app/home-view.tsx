@@ -75,9 +75,12 @@ export default function SpotterHome() {
         {/* Top Navbar */}
         <header className={styles.navbar} role="banner">
           <div className={styles.navBrand}>
-            <div className={styles.brandLogoBox} aria-label="Spotter Logo">
-              SPOTTER
-            </div>
+            <Link href="/" aria-label="Spotter Home" className={styles.brandLogoSquare}>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="36" height="36" aria-hidden="true">
+                <rect width="32" height="32" rx="6" fill="#008f70" />
+                <text x="50%" y="54%" textAnchor="middle" dominantBaseline="middle" fill="#ffffff" font-family="'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="20">S</text>
+              </svg>
+            </Link>
           </div>
 
           <div className={styles.navActions}>
