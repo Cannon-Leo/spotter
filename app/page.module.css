@@ -81,7 +81,7 @@
   background-color: var(--color-primary);
   color: var(--color-on-primary-fixed);
   border: none;
-  padding: 1.125rem;
+  padding: 0.9375rem 1.125rem;
   border-radius: 0.5rem;
   font-family: var(--typography-label-large-font-family);
   font-size: var(--typography-label-large-font-size);
@@ -109,7 +109,7 @@
   background-color: transparent;
   color: var(--color-on-background);
   border: 1px solid var(--color-outline-variant);
-  padding: 1.125rem;
+  padding: 0.9375rem 1.125rem;
   border-radius: 0.5rem;
   font-family: var(--typography-label-large-font-family);
   font-size: var(--typography-label-large-font-size);
@@ -200,7 +200,7 @@
   background-color: var(--color-secondary);
   color: var(--color-on-secondary);
   border: none;
-  padding: 1.125rem;
+  padding: 0.9375rem 1.125rem;
   border-radius: 0.5rem;
   font-family: var(--typography-label-large-font-family);
   font-size: var(--typography-label-large-font-size);
@@ -224,7 +224,7 @@
   background-color: transparent;
   color: var(--color-on-background);
   border: 1px solid var(--color-outline-color);
-  padding: 1.125rem;
+  padding: 0.9375rem 1.125rem;
   border-radius: 0.5rem;
   font-family: var(--typography-label-large-font-family);
   font-size: var(--typography-label-large-font-size);
@@ -490,7 +490,7 @@
   color: var(--color-on-secondary);
   border: none;
   border-radius: 0.5rem;
-  padding: 1.125rem;
+  padding: 0.9375rem 1.125rem;
   font-family: var(--typography-label-large-font-family);
   font-size: var(--typography-label-large-font-size);
   line-height: var(--typography-label-large-line-height);
