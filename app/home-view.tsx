@@ -89,7 +89,6 @@ export default function SpotterHome() {
             <div className={styles.brandLogoBox} aria-label="Spotter Logo">
               SPOTTER
             </div>
-            <span className={styles.brandSubtitle}>Official Gym Member Portal</span>
           </div>
 
           <div className={styles.navActions}>
@@ -101,29 +100,20 @@ export default function SpotterHome() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className={styles.navLogInBtn}
+                  className={styles.navSignOutBtn}
                   aria-label="Sign out of Spotter"
                 >
                   Sign Out
                 </button>
               </div>
             ) : (
-              <>
-                <Link
-                  href="/login"
-                  className={styles.navLogInBtn}
-                  aria-label="Log in to member portal"
-                >
-                  Log In
-                </Link>
-                <Link
-                  href="/create-account"
-                  className={styles.navSignUpBtn}
-                  aria-label="Create member account"
-                >
-                  Sign Up
-                </Link>
-              </>
+              <Link
+                href="/create-account"
+                className={styles.navGetStartedBtn}
+                aria-label="Get started with Spotter"
+              >
+                Get Started
+              </Link>
             )}
           </div>
         </header>
