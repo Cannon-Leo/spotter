@@ -246,7 +246,7 @@
   color: var(--color-on-secondary);
   border: none;
   border-radius: var(--radius-sm);
-  padding: var(--space-3);
+  padding: 1rem var(--space-3);
   font-family: var(--typography-label-large-font-family);
   font-size: var(--typography-label-large-font-size);
   font-weight: 700;
