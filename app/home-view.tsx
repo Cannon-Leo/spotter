@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import styles from './page.module.css';
 
 interface MemberSessionInfo {
@@ -42,23 +43,6 @@ export default function SpotterHome() {
   const [session, setSession] = useState<MemberSessionInfo | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Modals
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showActivateModal, setShowActivateModal] = useState(false);
-  const [showResetNotice, setShowResetNotice] = useState(false);
-
-  // Activation form state
-  const [activationCode, setActivationCode] = useState('');
-  const [pin, setPin] = useState('');
-  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
-  const [activateError, setActivateError] = useState('');
-  const [activateSubmitting, setActivateSubmitting] = useState(false);
-
-  // Login form state
-  const [loginPin, setLoginPin] = useState('');
-  const [loginError, setLoginError] = useState('');
-  const [loginSubmitting, setLoginSubmitting] = useState(false);
-
   // Check session on mount
   useEffect(() => {
     async function checkSession() {
@@ -76,83 +60,6 @@ export default function SpotterHome() {
     }
     checkSession();
   }, []);
-
-  // Handle Account Activation (PRD 6.1 FR-1 to FR-4)
-  async function handleActivate(e: React.FormEvent) {
-    e.preventDefault();
-    setActivateError('');
-
-    if (!activationCode.trim()) {
-      setActivateError('That code is not valid. Ask the front desk for a new one.');
-      return;
-    }
-
-    if (!/^\d{4}$/.test(pin.trim())) {
-      setActivateError('Please choose a 4-digit security PIN.');
-      return;
-    }
-
-    if (!acceptedPrivacy) {
-      setActivateError('Please accept the member privacy notice to continue.');
-      return;
-    }
-
-    setActivateSubmitting(true);
-    try {
-      const res = await fetch('/api/auth/activate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: activationCode, pin }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        setActivateError(data.error || 'That code is not valid. Ask the front desk for a new one.');
-      } else {
-        setSession(data.member);
-        setShowActivateModal(false);
-        setActivationCode('');
-        setPin('');
-      }
-    } catch {
-      setActivateError('That code is not valid. Ask the front desk for a new one.');
-    } finally {
-      setActivateSubmitting(false);
-    }
-  }
-
-  // Handle 4-Digit PIN Sign-in (PRD FR-6, FR-7)
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    setLoginError('');
-
-    if (!/^\d{4}$/.test(loginPin.trim())) {
-      setLoginError('Enter your 4-digit PIN.');
-      return;
-    }
-
-    setLoginSubmitting(true);
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin: loginPin }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        setLoginError(data.error || 'Invalid PIN.');
-      } else {
-        setSession(data.member);
-        setShowLoginModal(false);
-        setLoginPin('');
-      }
-    } catch {
-      setLoginError('Failed to sign in. Please try again.');
-    } finally {
-      setLoginSubmitting(false);
-    }
-  }
 
   // Handle Logout
   async function handleLogout() {
@@ -202,22 +109,20 @@ export default function SpotterHome() {
               </div>
             ) : (
               <>
-                <button
-                  type="button"
-                  onClick={() => setShowLoginModal(true)}
+                <Link
+                  href="/login"
                   className={styles.navLogInBtn}
-                  aria-label="Log in with PIN"
+                  aria-label="Log in to member portal"
                 >
                   Log In
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowActivateModal(true)}
+                </Link>
+                <Link
+                  href="/create-account"
                   className={styles.navSignUpBtn}
-                  aria-label="Sign up / activate account"
+                  aria-label="Create member account"
                 >
                   Sign Up
-                </button>
+                </Link>
               </>
             )}
           </div>
@@ -249,30 +154,29 @@ export default function SpotterHome() {
               </button>
             ) : (
               <>
-                <button
-                  type="button"
-                  onClick={() => setShowLoginModal(true)}
+                <Link
+                  href="/login"
                   className={styles.primaryCtaBtn}
                   aria-label="Log In to Member Portal"
                 >
                   Log In to Member Portal
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowActivateModal(true)}
+                </Link>
+                <Link
+                  href="/create-account"
                   className={styles.secondaryCtaBtn}
                   aria-label="Create Member Account"
                 >
                   Create Account
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowResetNotice(true)}
+                </Link>
+                <a
+                  href="https://wa.me/?text=Hello%20Front%20Desk,%20I%20need%20a%20temporary%20code%20or%20PIN%20reset%20for%20my%20Spotter%20account"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className={styles.resetLink}
                   aria-label="Temporary password reset instructions"
                 >
                   Have a temporary password? Reset here &rarr;
-                </button>
+                </a>
               </>
             )}
           </div>
@@ -321,192 +225,6 @@ export default function SpotterHome() {
           </div>
         </section>
       </div>
-
-      {/* --------------------------------------------------------------------
-       * Temporary PIN / Reset Notice Modal (PRD FR-5b)
-       * -------------------------------------------------------------------- */}
-      {showResetNotice && (
-        <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
-          <div className={styles.modalCard}>
-            <div className={styles.modalHeader}>
-              <h2 id="resetModalTitle" className={styles.modalTitle}>PIN Reset &amp; Re-link</h2>
-              <button
-                type="button"
-                onClick={() => setShowResetNotice(false)}
-                className={styles.modalCloseBtn}
-                aria-label="Close dialog"
-              >
-                ✕
-              </button>
-            </div>
-            <p className={styles.modalSubtext}>
-              Per gym security policy (PRD FR-5b), PIN resets and temporary codes are issued directly by the
-              front desk officer to your registered WhatsApp number or in person.
-            </p>
-            <div style={{ marginTop: 'var(--space-2)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-              <a
-                href="https://wa.me/?text=Hello%20Front%20Desk,%20I%20need%20a%20temporary%20code%20or%20PIN%20reset%20for%20my%20Spotter%20account"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.modalSubmitBtn}
-                style={{ textAlign: 'center', textDecoration: 'none' }}
-              >
-                Request Code from Front Desk &rarr;
-              </a>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowResetNotice(false);
-                  setShowActivateModal(true);
-                }}
-                className={styles.secondaryCtaBtn}
-              >
-                Enter Activation Code
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* --------------------------------------------------------------------
-       * Activation / Sign Up Modal (PRD 6.1 FR-1, FR-2, FR-3, FR-4)
-       * -------------------------------------------------------------------- */}
-      {showActivateModal && (
-        <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-labelledby="activateModalTitle">
-          <div className={styles.modalCard}>
-            <div className={styles.modalHeader}>
-              <h2 id="activateModalTitle" className={styles.modalTitle}>Activate Member Account</h2>
-              <button
-                type="button"
-                onClick={() => setShowActivateModal(false)}
-                className={styles.modalCloseBtn}
-                aria-label="Close dialog"
-              >
-                ✕
-              </button>
-            </div>
-            <p className={styles.modalSubtext}>
-              Enter the 8-character activation code issued in person or via registered WhatsApp by the front desk officer.
-            </p>
-
-            {activateError && <div className={styles.errorBanner} role="alert">{activateError}</div>}
-
-            <form onSubmit={handleActivate} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-              <div className={styles.formGroup}>
-                <label htmlFor="activationCodeInput" className={styles.formLabel}>
-                  8-Character Activation Code
-                </label>
-                <input
-                  id="activationCodeInput"
-                  name="activationCode"
-                  type="text"
-                  maxLength={10}
-                  placeholder="e.g. SPT4X9KL"
-                  value={activationCode}
-                  onChange={(e) => setActivationCode(e.target.value.toUpperCase())}
-                  className={styles.formInput}
-                  autoComplete="one-time-code"
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label htmlFor="setPinInput" className={styles.formLabel}>
-                  Choose Your 4-Digit Security PIN
-                </label>
-                <input
-                  id="setPinInput"
-                  name="pin"
-                  type="password"
-                  inputMode="numeric"
-                  maxLength={4}
-                  placeholder="••••"
-                  value={pin}
-                  onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
-                  className={styles.formInput}
-                  autoComplete="new-password"
-                  required
-                />
-              </div>
-
-              <label className={styles.privacyCheck}>
-                <input
-                  type="checkbox"
-                  checked={acceptedPrivacy}
-                  onChange={(e) => setAcceptedPrivacy(e.target.checked)}
-                  required
-                  style={{ marginTop: '3px' }}
-                />
-                <span>I accept the Spotter member privacy notice and terms of record access (FR-58).</span>
-              </label>
-
-              <button
-                type="submit"
-                disabled={activateSubmitting}
-                className={styles.modalSubmitBtn}
-              >
-                {activateSubmitting ? 'Activating Account...' : 'Complete Activation'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* --------------------------------------------------------------------
-       * PIN Login Modal (PRD 6.1 FR-6, FR-7)
-       * -------------------------------------------------------------------- */}
-      {showLoginModal && (
-        <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
-          <div className={styles.modalCard}>
-            <div className={styles.modalHeader}>
-              <h2 id="loginModalTitle" className={styles.modalTitle}>Member Sign In</h2>
-              <button
-                type="button"
-                onClick={() => setShowLoginModal(false)}
-                className={styles.modalCloseBtn}
-                aria-label="Close dialog"
-              >
-                ✕
-              </button>
-            </div>
-            <p className={styles.modalSubtext}>
-              Enter your personal 4-digit security PIN to access your membership records.
-            </p>
-
-            {loginError && <div className={styles.errorBanner} role="alert">{loginError}</div>}
-
-            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-              <div className={styles.formGroup}>
-                <label htmlFor="loginPinInput" className={styles.formLabel}>
-                  4-Digit Security PIN
-                </label>
-                <input
-                  id="loginPinInput"
-                  name="loginPin"
-                  type="password"
-                  inputMode="numeric"
-                  maxLength={4}
-                  placeholder="••••"
-                  value={loginPin}
-                  onChange={(e) => setLoginPin(e.target.value.replace(/\D/g, ''))}
-                  className={styles.formInput}
-                  autoComplete="current-password"
-                  autoFocus
-                  required
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loginSubmitting}
-                className={styles.modalSubmitBtn}
-              >
-                {loginSubmitting ? 'Verifying PIN...' : 'Log In to Member Portal'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

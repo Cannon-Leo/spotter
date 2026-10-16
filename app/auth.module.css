@@ -1,0 +1,288 @@
+/* ==============================================================================
+ * Spotter Auth Pages Styles (Login & Create Account)
+ * Designed strictly from the reference card layout with very soft shadows
+ * Strict WCAG AAA/AA contrast, proper tokens, and full accessibility
+ * ============================================================================== */
+
+.authPageRoot {
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--color-surface-container-lowest);
+  color: var(--color-on-background);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6) var(--space-4);
+}
+
+.authContainer {
+  max-width: 440px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Top bar: Back to Spotter + Official Member App */
+.authTopBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--typography-body-small-font-family);
+  font-size: var(--typography-body-small-font-size);
+  color: var(--color-on-surface-variant);
+  padding: 0 var(--space-1);
+}
+
+.backLink {
+  color: var(--color-on-background);
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  transition: color var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.backLink:hover {
+  color: var(--color-secondary);
+}
+
+.topBarBadge {
+  color: var(--color-on-surface-variant);
+  font-weight: 500;
+}
+
+/* Main Card */
+.authCard {
+  background-color: var(--color-surface-container-lowest);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05), 0 1px 4px -1px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.cardBody {
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.brandLogoBox {
+  align-self: flex-start;
+  background-color: var(--color-secondary);
+  color: var(--color-on-secondary);
+  font-family: var(--typography-title-large-font-family);
+  font-size: var(--typography-title-small-font-size);
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.cardTitle {
+  font-family: var(--typography-title-large-font-family);
+  font-size: 1.625rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--color-on-background);
+}
+
+.cardSubtitle {
+  font-family: var(--typography-body-small-font-family);
+  font-size: var(--typography-body-small-font-size);
+  line-height: 1.5;
+  color: var(--color-on-surface-variant);
+}
+
+.divider {
+  height: 1px;
+  width: 100%;
+  background-color: var(--color-outline-variant);
+  margin-top: calc(var(--space-1) * -1);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.labelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.formLabel {
+  font-family: var(--typography-label-medium-font-family);
+  font-size: var(--typography-label-medium-font-size);
+  font-weight: 600;
+  color: var(--color-on-background);
+}
+
+.forgotLink {
+  font-family: var(--typography-body-small-font-family);
+  font-size: var(--typography-body-small-font-size);
+  color: var(--color-on-surface-variant);
+  text-decoration: none;
+}
+
+.forgotLink:hover {
+  color: var(--color-secondary);
+  text-decoration: underline;
+}
+
+.formInput {
+  background-color: var(--color-surface-container-high);
+  color: var(--color-on-background);
+  border: 1px solid var(--color-outline-color);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  font-family: var(--typography-body-medium-font-family);
+  font-size: var(--typography-body-medium-font-size);
+  outline: none;
+  width: 100%;
+  transition: border-color var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.formInput:focus {
+  border-color: var(--color-secondary);
+}
+
+/* Password wrapper with Show / Hide button */
+.passwordWrapper {
+  display: flex;
+  position: relative;
+  width: 100%;
+}
+
+.passwordInput {
+  background-color: var(--color-surface-container-high);
+  color: var(--color-on-background);
+  border: 1px solid var(--color-outline-color);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  padding-right: 64px;
+  font-family: var(--typography-body-medium-font-family);
+  font-size: var(--typography-body-medium-font-size);
+  outline: none;
+  width: 100%;
+  transition: border-color var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.passwordInput:focus {
+  border-color: var(--color-secondary);
+}
+
+.showHideBtn {
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  bottom: 1px;
+  background-color: var(--color-surface-container-highest);
+  color: var(--color-on-surface-variant);
+  border: none;
+  border-left: 1px solid var(--color-outline-color);
+  border-top-right-radius: var(--radius-sm);
+  border-bottom-right-radius: var(--radius-sm);
+  padding: 0 var(--space-3);
+  font-family: var(--typography-label-medium-font-family);
+  font-size: var(--typography-label-small-font-size);
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.showHideBtn:hover {
+  background-color: var(--color-surface-container-high);
+  color: var(--color-on-background);
+}
+
+.privacyCheck {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-family: var(--typography-body-small-font-family);
+  font-size: var(--typography-body-small-font-size);
+  color: var(--color-on-surface-variant);
+  cursor: pointer;
+}
+
+.errorBanner {
+  background-color: var(--color-error-container);
+  color: var(--color-on-error-container);
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--typography-body-small-font-family);
+  font-size: var(--typography-body-small-font-size);
+}
+
+.submitBtn {
+  background-color: var(--color-secondary);
+  color: var(--color-on-secondary);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  font-family: var(--typography-label-large-font-family);
+  font-size: var(--typography-label-large-font-size);
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  transition: opacity var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.submitBtn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Tinted Card Footer */
+.cardFooter {
+  background-color: var(--color-surface-container-high);
+  border-top: 1px solid var(--color-outline-variant);
+  padding: var(--space-3) var(--space-4);
+  text-align: center;
+  font-family: var(--typography-body-small-font-family);
+  font-size: var(--typography-body-small-font-size);
+  color: var(--color-on-surface-variant);
+}
+
+.footerLink {
+  color: var(--color-secondary);
+  font-weight: 700;
+  text-decoration: underline;
+  margin-left: var(--space-1);
+}
+
+.footerLink:hover {
+  opacity: 0.85;
+}
+
