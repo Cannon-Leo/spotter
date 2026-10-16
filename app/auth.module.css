@@ -245,8 +245,8 @@
   background-color: var(--color-secondary);
   color: var(--color-on-secondary);
   border: none;
-  border-radius: var(--radius-sm);
-  padding: 1rem var(--space-3);
+  border-radius: 0.5rem;
+  padding: 1.125rem;
   font-family: var(--typography-label-large-font-family);
   font-size: var(--typography-label-large-font-size);
   font-weight: 700;
