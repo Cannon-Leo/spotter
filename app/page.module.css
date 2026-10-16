@@ -154,7 +154,7 @@
 .heroHeadline {
   font-family: var(--typography-display-large-font-family);
   font-size: var(--typography-display-large-font-size);
-  line-height: var(--typography-display-large-line-height);
+  line-height: 80px;
   font-weight: var(--typography-display-large-font-weight);
   letter-spacing: var(--typography-display-large-letter-spacing);
   color: var(--color-on-background);
