@@ -112,17 +112,12 @@ export default function SpotterHome() {
 
         {/* Hero Section */}
         <section className={styles.heroSection} aria-label="Introduction">
-          <div className={styles.recordsBadge}>
-            100% Approved Gym Records
-          </div>
-
           <h1 className={styles.heroHeadline}>
             Your Gym. Your Records.<br />Instant Access.
           </h1>
 
           <p className={styles.heroSubtitle}>
-            Spotter is designed for gym members. Generate your check-in code, view your verified
-            personal attendance and ledger balance, and get verified answers anytime.
+            Check in, view attendance and balance, and get verified answers instantly.
           </p>
 
           <div className={styles.heroCtaRow}>
@@ -135,31 +130,13 @@ export default function SpotterHome() {
                 Sign Out of Portal
               </button>
             ) : (
-              <>
-                <Link
-                  href="/login"
-                  className={styles.primaryCtaBtn}
-                  aria-label="Log In to Member Portal"
-                >
-                  Log In to Member Portal
-                </Link>
-                <Link
-                  href="/create-account"
-                  className={styles.secondaryCtaBtn}
-                  aria-label="Create Member Account"
-                >
-                  Create Account
-                </Link>
-                <a
-                  href="https://wa.me/?text=Hello%20Front%20Desk,%20I%20need%20a%20temporary%20code%20or%20PIN%20reset%20for%20my%20Spotter%20account"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.resetLink}
-                  aria-label="Temporary password reset instructions"
-                >
-                  Have a temporary password? Reset here &rarr;
-                </a>
-              </>
+              <Link
+                href="/create-account"
+                className={styles.primaryCtaBtn}
+                aria-label="Get started for free"
+              >
+                Get started for free
+              </Link>
             )}
           </div>
 
