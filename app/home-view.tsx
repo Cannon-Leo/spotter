@@ -118,7 +118,10 @@ export default function SpotterHome() {
           </h1>
 
           <p className={styles.heroSubtitle}>
-            Check in, view attendance and balance, and get verified answers instantly.
+            <span>Check in, view attendance and balance,</span>
+            <span className={styles.heroSubtitleBreak}>
+              and get verified answers instantly.
+            </span>
           </p>
 
           <div className={styles.heroCtaRow}>
