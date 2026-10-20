@@ -26,7 +26,9 @@
   border-radius: var(--radius-sm);
   font-family: var(--typography-label-large-font-family);
   font-size: var(--typography-label-large-font-size);
-  font-weight: 700;
+  line-height: var(--typography-label-large-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--typography-label-large-letter-spacing);
   text-decoration: underline;
   transform: translateY(-200%);
   transition: transform var(--motion-duration-fast) var(--motion-ease-standard);
@@ -109,7 +111,9 @@
 .memberChip {
   font-family: var(--typography-label-medium-font-family);
   font-size: var(--typography-label-medium-font-size);
-  font-weight: 700;
+  line-height: var(--typography-label-medium-line-height);
+  font-weight: var(--typography-label-medium-font-weight);
+  letter-spacing: var(--typography-label-medium-letter-spacing);
   color: var(--color-on-surface-variant);
   max-width: 100%;
   overflow-wrap: anywhere;
@@ -658,6 +662,9 @@
 .userBannerMeta {
   font-family: var(--typography-body-small-font-family);
   font-size: var(--typography-body-small-font-size);
+  line-height: var(--typography-body-small-line-height);
+  font-weight: var(--typography-body-small-font-weight);
+  letter-spacing: var(--typography-body-small-letter-spacing);
   color: var(--color-on-surface-variant);
 }
 
