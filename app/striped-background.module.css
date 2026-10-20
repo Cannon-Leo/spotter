@@ -1,7 +1,7 @@
 /* ==============================================================================
- * Spotter Abstract Striped Animated Background
- * Designed to cut across the entire marketing page while respecting
- * brand design tokens, WCAG AAA readability, and prefers-reduced-motion
+ * Spotter Clean Abstract Striped Background
+ * Animated, elegant, athletic geometric stripes cutting across the whole page.
+ * Explicitly tuned for dark mode to be non-intrusive, serene, and distraction-free.
  * ============================================================================== */
 
 .backgroundWrapper {
@@ -17,100 +17,98 @@
 }
 
 /* --------------------------------------------------------------------------
- * Ambient brand glow (Teal / Emerald radial lights)
+ * Layer 1: Tranquil Ambient Base Glow
  * -------------------------------------------------------------------------- */
-.ambientGlowLayer {
+.ambientMutedTint {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   background:
-    radial-gradient(circle 650px at 90% 12%, rgba(0, 227, 170, 0.08), transparent 70%),
-    radial-gradient(circle 750px at 8% 45%, rgba(0, 143, 112, 0.07), transparent 75%),
-    radial-gradient(circle 600px at 85% 80%, rgba(0, 227, 170, 0.06), transparent 70%);
-  animation: glowPulse 16s ease-in-out infinite alternate;
-  will-change: opacity, transform;
+    radial-gradient(ellipse 700px 500px at 95% 8%, rgba(0, 227, 170, 0.05), transparent 70%),
+    radial-gradient(ellipse 800px 600px at 5% 55%, rgba(0, 143, 112, 0.045), transparent 75%),
+    radial-gradient(ellipse 650px 450px at 90% 85%, rgba(0, 227, 170, 0.04), transparent 70%);
+  opacity: 0.8;
+  animation: ambientBreathe 20s ease-in-out infinite alternate;
+  will-change: opacity;
 }
 
-:global([data-theme='dark']) .ambientGlowLayer {
+/* Dark mode: Deep, muted, executive, calm without bright neon halos */
+:global([data-theme='dark']) .ambientMutedTint {
   background:
-    radial-gradient(circle 700px at 90% 12%, rgba(0, 227, 170, 0.12), transparent 70%),
-    radial-gradient(circle 800px at 8% 45%, rgba(0, 143, 112, 0.14), transparent 75%),
-    radial-gradient(circle 650px at 85% 80%, rgba(0, 227, 170, 0.10), transparent 70%);
+    radial-gradient(ellipse 750px 550px at 95% 8%, rgba(0, 227, 170, 0.04), transparent 70%),
+    radial-gradient(ellipse 850px 650px at 5% 55%, rgba(0, 143, 112, 0.045), transparent 75%),
+    radial-gradient(ellipse 700px 500px at 90% 85%, rgba(0, 227, 170, 0.035), transparent 70%);
+  opacity: 0.55;
 }
 
-@keyframes glowPulse {
+@keyframes ambientBreathe {
   0% {
-    opacity: 0.75;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.05);
+    opacity: 0.65;
   }
   100% {
-    opacity: 0.8;
-    transform: scale(0.98);
+    opacity: 0.95;
   }
 }
 
 /* --------------------------------------------------------------------------
- * Continuous Animated Diagonal Striped Texture
+ * Layer 2: Continuous Flowing Diagonal Striped Texture Canvas
  * -------------------------------------------------------------------------- */
-.stripedCanvas {
+.pinStripeField {
   position: absolute;
-  top: -20%;
-  left: -20%;
-  width: 140%;
-  height: 140%;
+  top: -25%;
+  left: -25%;
+  width: 150%;
+  height: 150%;
   background-image: repeating-linear-gradient(
-    -35deg,
+    -30deg,
     transparent,
-    transparent 28px,
-    rgba(0, 143, 112, 0.035) 28px,
-    rgba(0, 143, 112, 0.035) 30px,
     transparent 30px,
-    transparent 64px,
-    rgba(0, 227, 170, 0.04) 64px,
-    rgba(0, 227, 170, 0.04) 67px,
-    transparent 67px,
-    transparent 96px
+    rgba(0, 143, 112, 0.032) 30px,
+    rgba(0, 143, 112, 0.032) 31.5px,
+    transparent 31.5px,
+    transparent 68px,
+    rgba(0, 227, 170, 0.036) 68px,
+    rgba(0, 227, 170, 0.036) 70px,
+    transparent 70px,
+    transparent 102px
   );
-  background-size: 140px 140px;
-  animation: stripeContinuousFlow 32s linear infinite;
+  background-size: 136px 136px;
+  animation: stripeContinuousFlow 38s linear infinite;
   mask-image: linear-gradient(
     180deg,
-    rgba(0, 0, 0, 0.9) 0%,
-    rgba(0, 0, 0, 0.6) 25%,
-    rgba(0, 0, 0, 0.75) 50%,
-    rgba(0, 0, 0, 0.5) 75%,
-    rgba(0, 0, 0, 0.8) 100%
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.45) 30%,
+    rgba(0, 0, 0, 0.65) 60%,
+    rgba(0, 0, 0, 0.4) 85%,
+    rgba(0, 0, 0, 0.75) 100%
   );
   -webkit-mask-image: linear-gradient(
     180deg,
-    rgba(0, 0, 0, 0.9) 0%,
-    rgba(0, 0, 0, 0.6) 25%,
-    rgba(0, 0, 0, 0.75) 50%,
-    rgba(0, 0, 0, 0.5) 75%,
-    rgba(0, 0, 0, 0.8) 100%
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.45) 30%,
+    rgba(0, 0, 0, 0.65) 60%,
+    rgba(0, 0, 0, 0.4) 85%,
+    rgba(0, 0, 0, 0.75) 100%
   );
   will-change: background-position;
 }
 
-:global([data-theme='dark']) .stripedCanvas {
+:global([data-theme='dark']) .pinStripeField {
   background-image: repeating-linear-gradient(
-    -35deg,
+    -30deg,
     transparent,
-    transparent 28px,
-    rgba(0, 143, 112, 0.06) 28px,
-    rgba(0, 143, 112, 0.06) 30px,
     transparent 30px,
-    transparent 64px,
-    rgba(0, 227, 170, 0.07) 64px,
-    rgba(0, 227, 170, 0.07) 67px,
-    transparent 67px,
-    transparent 96px
+    rgba(0, 143, 112, 0.03) 30px,
+    rgba(0, 143, 112, 0.03) 31.5px,
+    transparent 31.5px,
+    transparent 68px,
+    rgba(0, 227, 170, 0.032) 68px,
+    rgba(0, 227, 170, 0.032) 70px,
+    transparent 70px,
+    transparent 102px
   );
+  opacity: 0.45;
 }
 
 @keyframes stripeContinuousFlow {
@@ -118,208 +116,270 @@
     background-position: 0 0;
   }
   100% {
-    background-position: 280px 280px;
+    background-position: 272px 272px;
   }
 }
 
 /* --------------------------------------------------------------------------
- * Dynamic Striped Beams / Ribbon Cluster (Cutting across the entire page)
+ * Layer 3: Elegant Architectural Speed Ribbons Cutting Across Page
  * -------------------------------------------------------------------------- */
-.ribbonCluster {
+.speedRibbonTrack {
   position: absolute;
   top: -15%;
   left: 20%;
   width: 120%;
   height: 150%;
-  transform: rotate(-32deg);
+  transform: rotate(-30deg);
   transform-origin: center;
   display: flex;
-  gap: 36px;
-  animation: ribbonDrift 22s ease-in-out infinite alternate;
-  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, rgba(0, 0, 0, 0.85) 30%, transparent 85%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, rgba(0, 0, 0, 0.85) 30%, transparent 85%);
+  gap: 40px;
+  animation: ribbonOscillate 24s ease-in-out infinite alternate;
+  mask-image: radial-gradient(ellipse 85% 75% at 50% 50%, rgba(0, 0, 0, 0.85) 25%, transparent 85%);
+  -webkit-mask-image: radial-gradient(ellipse 85% 75% at 50% 50%, rgba(0, 0, 0, 0.85) 25%, transparent 85%);
   will-change: transform;
 }
 
-@keyframes ribbonDrift {
+@keyframes ribbonOscillate {
   0% {
-    transform: rotate(-32deg) translate3d(0, 0, 0);
+    transform: rotate(-30deg) translate3d(0, 0, 0);
   }
   50% {
-    transform: rotate(-30.5deg) translate3d(-30px, 40px, 0);
+    transform: rotate(-29deg) translate3d(-25px, 35px, 0);
   }
   100% {
-    transform: rotate(-33deg) translate3d(20px, -20px, 0);
+    transform: rotate(-30.5deg) translate3d(20px, -20px, 0);
   }
 }
 
-.stripeBeam {
+.ribbonBand {
   height: 250%;
-  border-radius: 999px;
-  opacity: 0.65;
+  border-radius: 9999px;
   will-change: opacity, transform;
 }
 
-.beam1 {
-  width: 48px;
+.ribbonBand1 {
+  width: 32px;
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(0, 143, 112, 0.07) 25%,
-    rgba(0, 227, 170, 0.12) 50%,
-    rgba(0, 143, 112, 0.06) 75%,
+    rgba(0, 143, 112, 0.06) 25%,
+    rgba(0, 227, 170, 0.10) 50%,
+    rgba(0, 143, 112, 0.05) 75%,
     transparent 100%
   );
-  animation: beamShimmer 14s ease-in-out infinite alternate;
+  animation: ribbonShimmer 16s ease-in-out infinite alternate;
 }
 
-.beam2 {
-  width: 18px;
-  margin-top: -120px;
+.ribbonBand2 {
+  width: 10px;
+  margin-top: -100px;
   background: linear-gradient(
     180deg,
-    transparent 5%,
-    rgba(0, 227, 170, 0.15) 35%,
-    rgba(0, 143, 112, 0.08) 65%,
+    transparent 10%,
+    rgba(0, 227, 170, 0.12) 40%,
+    rgba(0, 143, 112, 0.07) 70%,
     transparent 95%
   );
-  animation: beamShimmer 10s ease-in-out infinite alternate-reverse;
+  animation: ribbonShimmer 12s ease-in-out infinite alternate-reverse;
 }
 
-.beam3 {
-  width: 84px;
-  margin-top: 150px;
+.ribbonBand3 {
+  width: 64px;
+  margin-top: 140px;
   background: linear-gradient(
     180deg,
     transparent 0%,
     rgba(0, 143, 112, 0.05) 20%,
-    rgba(0, 227, 170, 0.09) 50%,
+    rgba(0, 227, 170, 0.08) 50%,
     rgba(0, 143, 112, 0.04) 80%,
     transparent 100%
   );
-  animation: beamShimmer 18s ease-in-out infinite alternate;
+  animation: ribbonShimmer 20s ease-in-out infinite alternate;
 }
 
-.beam4 {
-  width: 12px;
-  margin-top: -60px;
+.ribbonBand4 {
+  width: 18px;
+  margin-top: -50px;
   background: linear-gradient(
     180deg,
-    transparent 10%,
-    rgba(0, 227, 170, 0.18) 40%,
-    rgba(0, 143, 112, 0.09) 70%,
+    transparent 15%,
+    rgba(0, 227, 170, 0.10) 45%,
+    rgba(0, 143, 112, 0.06) 75%,
     transparent 90%
   );
-  animation: beamShimmer 8s ease-in-out infinite alternate;
+  animation: ribbonShimmer 14s ease-in-out infinite alternate;
 }
 
-.beam5 {
-  width: 64px;
-  margin-top: 80px;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(0, 227, 170, 0.08) 30%,
-    rgba(0, 143, 112, 0.10) 60%,
-    transparent 100%
-  );
-  animation: beamShimmer 16s ease-in-out infinite alternate-reverse;
+/* In dark mode: Tone down opacity, softly muted, no visual noise */
+:global([data-theme='dark']) .speedRibbonTrack {
+  opacity: 0.28;
 }
 
-:global([data-theme='dark']) .beam1 {
-  background: linear-gradient(180deg, transparent 0%, rgba(0, 143, 112, 0.12) 25%, rgba(0, 227, 170, 0.18) 50%, rgba(0, 143, 112, 0.10) 75%, transparent 100%);
+:global([data-theme='dark']) .ribbonBand1 {
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 143, 112, 0.07) 25%, rgba(0, 227, 170, 0.11) 50%, rgba(0, 143, 112, 0.06) 75%, transparent 100%);
 }
 
-:global([data-theme='dark']) .beam2 {
-  background: linear-gradient(180deg, transparent 5%, rgba(0, 227, 170, 0.22) 35%, rgba(0, 143, 112, 0.14) 65%, transparent 95%);
+:global([data-theme='dark']) .ribbonBand2 {
+  background: linear-gradient(180deg, transparent 10%, rgba(0, 227, 170, 0.14) 40%, rgba(0, 143, 112, 0.08) 70%, transparent 95%);
 }
 
-:global([data-theme='dark']) .beam3 {
-  background: linear-gradient(180deg, transparent 0%, rgba(0, 143, 112, 0.09) 20%, rgba(0, 227, 170, 0.15) 50%, rgba(0, 143, 112, 0.07) 80%, transparent 100%);
+:global([data-theme='dark']) .ribbonBand3 {
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 143, 112, 0.06) 20%, rgba(0, 227, 170, 0.09) 50%, rgba(0, 143, 112, 0.05) 80%, transparent 100%);
 }
 
-:global([data-theme='dark']) .beam4 {
-  background: linear-gradient(180deg, transparent 10%, rgba(0, 227, 170, 0.25) 40%, rgba(0, 143, 112, 0.14) 70%, transparent 90%);
+:global([data-theme='dark']) .ribbonBand4 {
+  background: linear-gradient(180deg, transparent 15%, rgba(0, 227, 170, 0.12) 45%, rgba(0, 143, 112, 0.07) 75%, transparent 90%);
 }
 
-:global([data-theme='dark']) .beam5 {
-  background: linear-gradient(180deg, transparent 0%, rgba(0, 227, 170, 0.14) 30%, rgba(0, 143, 112, 0.16) 60%, transparent 100%);
-}
-
-@keyframes beamShimmer {
+@keyframes ribbonShimmer {
   0% {
-    opacity: 0.5;
+    opacity: 0.55;
     transform: translateY(0);
   }
   100% {
     opacity: 0.9;
-    transform: translateY(-40px);
+    transform: translateY(-30px);
   }
 }
 
 /* --------------------------------------------------------------------------
- * Precise SVG Vector Accent Stripes
+ * Layer 4: Gentle Diagonal Light Sweep Sheen
  * -------------------------------------------------------------------------- */
-.svgLayer {
+.lightSweepSheen {
+  position: absolute;
+  top: -30%;
+  left: -30%;
+  width: 160%;
+  height: 160%;
+  background: linear-gradient(
+    -30deg,
+    transparent 0%,
+    transparent 44%,
+    rgba(0, 227, 170, 0.035) 50%,
+    transparent 56%,
+    transparent 100%
+  );
+  animation: sweepGlance 18s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+:global([data-theme='dark']) .lightSweepSheen {
+  background: linear-gradient(
+    -30deg,
+    transparent 0%,
+    transparent 44%,
+    rgba(0, 227, 170, 0.025) 50%,
+    transparent 56%,
+    transparent 100%
+  );
+  opacity: 0.45;
+}
+
+@keyframes sweepGlance {
+  0% {
+    transform: translate3d(-20%, -20%, 0);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  50% {
+    transform: translate3d(20%, 20%, 0);
+    opacity: 0;
+  }
+  100% {
+    transform: translate3d(-20%, -20%, 0);
+    opacity: 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
+ * Layer 5: High-Precision Vector Striped Accent Lines
+ * -------------------------------------------------------------------------- */
+.vectorStripeLayer {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.45;
+  opacity: 0.35;
 }
 
-:global([data-theme='dark']) .svgLayer {
-  opacity: 0.65;
+.svgLineBase {
+  stroke-opacity: 0.08;
+}
+
+.svgLineAccent {
+  stroke-opacity: 0.06;
+}
+
+.svgRibbonGroup {
+  animation: svgRibbonFloat 22s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes svgRibbonFloat {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-20px, 20px, 0);
+  }
+}
+
+:global([data-theme='dark']) .vectorStripeLayer {
+  opacity: 0.22;
+}
+
+/* --------------------------------------------------------------------------
+ * Subtle Variant (for auth / login pages)
+ * -------------------------------------------------------------------------- */
+.subtleVariant {
+  opacity: 0.32;
+}
+
+.subtleVariant .ambientMutedTint {
+  opacity: 0.35;
+}
+
+.subtleVariant .pinStripeField {
+  opacity: 0.25;
+}
+
+.subtleVariant .speedRibbonTrack {
+  opacity: 0.18;
+  filter: blur(4px);
+}
+
+.subtleVariant .lightSweepSheen {
+  opacity: 0.15;
+}
+
+.subtleVariant .vectorStripeLayer {
+  opacity: 0.14;
+}
+
+:global([data-theme='dark']) .subtleVariant {
+  opacity: 0.22;
+}
+
+:global([data-theme='dark']) .subtleVariant .speedRibbonTrack {
+  opacity: 0.12;
 }
 
 /* --------------------------------------------------------------------------
  * Accessibility: Respect prefers-reduced-motion
  * -------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
-  .ambientGlowLayer,
-  .stripedCanvas,
-  .ribbonCluster,
-  .beam1,
-  .beam2,
-  .beam3,
-  .beam4,
-  .beam5 {
+  .ambientMutedTint,
+  .pinStripeField,
+  .speedRibbonTrack,
+  .ribbonBand1,
+  .ribbonBand2,
+  .ribbonBand3,
+  .ribbonBand4,
+  .lightSweepSheen,
+  .svgRibbonGroup {
     animation: none !important;
     transform: none !important;
   }
-}
-
-
-/* --------------------------------------------------------------------------
- * Subtle Variant (for auth/login pages to remain discreet and non-intrusive)
- * -------------------------------------------------------------------------- */
-.subtleVariant {
-  opacity: 0.38;
-}
-
-.subtleVariant .ambientGlowLayer {
-  opacity: 0.35;
-  filter: blur(20px);
-}
-
-.subtleVariant .stripedCanvas {
-  opacity: 0.32;
-  background-size: 160px 160px;
-}
-
-.subtleVariant .ribbonCluster {
-  opacity: 0.28;
-  filter: blur(4px);
-}
-
-.subtleVariant .svgLayer {
-  opacity: 0.18;
-}
-
-:global([data-theme='dark']) .subtleVariant {
-  opacity: 0.42;
-}
-
-:global([data-theme='dark']) .subtleVariant .ribbonCluster {
-  opacity: 0.32;
 }

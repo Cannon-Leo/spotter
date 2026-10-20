@@ -36,6 +36,9 @@ Spotter centers around five foundational features designed strictly for member s
 - **Framework**: [Next.js 14](https://nextjs.org/) (App Router, Server Components & Client Component boundaries)
 - **Language**: [TypeScript](https://www.typescriptlang.org/) (Strict typing, `tsc --noEmit` validation)
 - **Styling & Tokens**: Custom Design System defined in `design-tokens.tokens.json` compiled to CSS Custom Properties (`styles/tokens.css`, `styles/globals.css`).
+- **Theme & Accessibility**: System-wide dark/light mode engine with WCAG AAA contrast, pure white light mode (`#ffffff`), and full `prefers-reduced-motion` compliance.
+- **UI & Motion**: Sticky navigation with frosted glass backdrop blur (`top: 0px`) and an abstract, non-intrusive animated geometric striped canvas.
+- **Legal & Compliance**: Nigeria Data Protection Act 2023 (NDPA) and NDPR-compliant privacy notice and member terms integrated as instant in-page conditional views.
 - **Database & ORM**: PostgreSQL with `pgvector` for semantic card chunk embeddings via [Prisma ORM](https://www.prisma.io/).
 - **AI & Grounding**: Google Gemini API for semantic retrieval, answers, and strict grounding verification against approved source records.
 - **Authentication**: Secure HttpOnly session cookies (`src/server/auth/session.ts`) isolating all private record queries by session member ID.
@@ -50,17 +53,27 @@ spotter/
 │   ├── api/auth/              # Authentication routes (login, activate, logout, session)
 │   ├── create-account/        # Dedicated member activation & onboarding page
 │   ├── login/                 # Dedicated member sign-in page
+│   ├── reset-password/        # Member PIN reset instructions & desk handoff
 │   ├── favicon.ico/           # Dynamic favicon endpoint
-│   ├── home-view.tsx          # Client view for member marketing and portal home
-│   ├── layout.tsx             # Root application layout with fonts and metadata
+│   ├── footer.tsx             # Global accessible footer component with legal links
+│   ├── footer.module.css      # Scoped footer styling and layout
+│   ├── home-view.tsx          # Client view for member marketing, portal home, and legal views
+│   ├── layout.tsx             # Root application layout with fonts, metadata, and theme script
+│   ├── legal.module.css       # Scoped styling for NDPA privacy and terms views
 │   ├── page.tsx               # Server-rendered marketing page with dynamic SEO
-│   ├── page.module.css        # Scoped styling for member views and components
+│   ├── page.module.css        # Scoped styling for member views and sticky navigation
+│   ├── privacy-view.tsx       # In-page NDPA 2023 compliant privacy notice view
+│   ├── spotter-logo.tsx       # Brand logo component
+│   ├── striped-background.tsx # Multi-layer animated geometric background
+│   ├── striped-background.module.css # Background animation keyframes and responsive tracks
+│   ├── terms-view.tsx         # In-page member terms of service view
+│   ├── theme-toggle.tsx       # Accessible light/dark theme switch
 │   └── auth.module.css        # Scoped styling for authentication forms
 ├── public/                    # Static assets
 ├── scripts/                   # Utility scripts (e.g. design token compiler)
 ├── styles/                    # Global styling & token definitions
-│   ├── globals.css            # Base resets and element defaults
-│   └── tokens.css             # Compiled design system tokens
+│   ├── globals.css            # Base resets, overflow clipping, and element defaults
+│   └── tokens.css             # Compiled design system tokens (light and dark mode roles)
 ├── design-tokens.tokens.json  # Single source of truth for design tokens
 ├── package.json               # Dependencies and build scripts
 └── tsconfig.json              # TypeScript compiler configuration

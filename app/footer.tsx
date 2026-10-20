@@ -1,30 +1,37 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import styles from './footer.module.css';
+import SpotterLogo from './spotter-logo';
 
-export default function Footer() {
+interface FooterProps {
+  onSelectView?: (view: 'privacy' | 'terms') => void;
+}
+
+export default function Footer({ onSelectView }: FooterProps) {
+  const handlePrivacyClick = (e: React.MouseEvent) => {
+    if (onSelectView) {
+      e.preventDefault();
+      onSelectView('privacy');
+    }
+  };
+
+  const handleTermsClick = (e: React.MouseEvent) => {
+    if (onSelectView) {
+      e.preventDefault();
+      onSelectView('terms');
+    }
+  };
+
   return (
-    <footer className={styles.footerRoot} aria-label="Site Footer">
+    <footer className={styles.footerRoot}>
       <div className={styles.footerContainer}>
         <div className={styles.footerGrid}>
           {/* Column 1: Brand & Compliance */}
           <div className={styles.brandCol}>
-            <Link href="/" className={styles.brandLogoRow} aria-label="Spotter Home">
-              <span className={styles.brandLogoSquare} aria-hidden="true">
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#ffffff"
-                  strokeWidth="2.75"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M18 6 6 18" />
-                  <path d="m6 6 12 12" />
-                </svg>
-              </span>
+            <Link href="/" className={styles.brandLogoRow}>
+              <SpotterLogo size={32} />
               <span className={styles.brandName}>Spotter</span>
             </Link>
             <p className={styles.brandDesc}>
@@ -65,29 +72,45 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 3: Legal & Governance */}
+          {/* Column 3: Legal & Governance (Conditional Views on Home) */}
           <div>
             <h3 className={styles.colTitle}>Legal & Privacy</h3>
             <ul className={styles.linkList}>
               <li>
-                <Link href="/privacy" className={styles.footerLink}>
+                <a
+                  href="/?view=privacy"
+                  onClick={handlePrivacyClick}
+                  className={styles.footerLink}
+                >
                   Privacy Policy
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="/terms" className={styles.footerLink}>
+                <a
+                  href="/?view=terms"
+                  onClick={handleTermsClick}
+                  className={styles.footerLink}
+                >
                   Terms of Service
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="/privacy#data-controller" className={styles.footerLink}>
+                <a
+                  href="/?view=privacy#data-controller"
+                  onClick={handlePrivacyClick}
+                  className={styles.footerLink}
+                >
                   Data Controller Notice
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="/privacy#member-rights" className={styles.footerLink}>
+                <a
+                  href="/?view=privacy#member-rights"
+                  onClick={handlePrivacyClick}
+                  className={styles.footerLink}
+                >
                   Your Data Rights
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
@@ -105,7 +128,6 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className={styles.footerLink}
-                  aria-label="Message front desk officer on WhatsApp"
                 >
                   Ask Desk on WhatsApp &rarr;
                 </a>
@@ -125,17 +147,24 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} Spotter. Built for single gym member independence. Operating under Nigerian law.
           </p>
           <div className={styles.bottomLinks}>
-            <Link href="/privacy" className={styles.footerLink}>
+            <a
+              href="/?view=privacy"
+              onClick={handlePrivacyClick}
+              className={styles.footerLink}
+            >
               Privacy Policy
-            </Link>
+            </a>
             <span aria-hidden="true">&bull;</span>
-            <Link href="/terms" className={styles.footerLink}>
+            <a
+              href="/?view=terms"
+              onClick={handleTermsClick}
+              className={styles.footerLink}
+            >
               Terms of Service
-            </Link>
+            </a>
           </div>
         </div>
       </div>
     </footer>
   );
 }
-

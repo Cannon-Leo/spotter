@@ -195,7 +195,7 @@
   --color-on-tertiary-fixed: var(--primitive-palette-tertiary-1);
   --color-tertiary-fixed-dim: var(--primitive-palette-tertiary-8);
   --color-on-tertiary-fixed-variant: var(--primitive-palette-tertiary-3);
-  --color-background: var(--primitive-palette-neutral-12);
+  --color-background: var(--primitive-palette-neutral-13);
   --color-on-background: var(--primitive-palette-neutral-1);
   --color-surface-bright: var(--primitive-palette-neutral-12);
   --color-surface-dim: var(--primitive-palette-neutral-11);
@@ -338,6 +338,45 @@
   --font-weight-medium: 600;
   --font-weight-bold: 700;
   --font-weight-extra-bold: 800;
+}
+
+/* ==========================================================================
+ * 8.5. LIGHT MODE EXPLICIT SELECTOR
+ * Ensures switching to light mode on an OS that prefers dark mode immediately
+ * and unequivocally applies pure white background and design-system light tokens.
+ * ========================================================================== */
+html[data-theme="light"] {
+  color-scheme: light;
+  --color-background: var(--primitive-palette-neutral-13);
+  --color-on-background: var(--primitive-palette-neutral-1);
+  --color-surface: var(--primitive-palette-neutral-13);
+  --color-on-surface: var(--primitive-palette-neutral-1);
+  --color-surface-variant: var(--primitive-palette-neutral-11);
+  --color-on-surface-variant: var(--primitive-palette-neutral-3);
+  --color-surface-container-lowest: var(--primitive-palette-neutral-13);
+  --color-surface-container-low: var(--primitive-palette-neutral-12);
+  --color-surface-container: var(--primitive-palette-neutral-11);
+  --color-surface-container-high: var(--primitive-palette-neutral-10);
+  --color-surface-container-highest: var(--primitive-palette-neutral-9);
+  --color-surface-bright: var(--primitive-palette-neutral-13);
+  --color-surface-dim: var(--primitive-palette-neutral-11);
+  --color-outline-color: var(--primitive-palette-neutral-var-8);
+  --color-outline-variant: var(--primitive-palette-neutral-var-9);
+  --color-secondary: var(--primitive-palette-secondary-3);
+  --color-on-secondary: var(--primitive-palette-secondary-13);
+  --color-secondary-container: var(--primitive-palette-secondary-9);
+  --color-on-secondary-container: var(--primitive-palette-secondary-3);
+  --color-primary: var(--primitive-palette-primary-4);
+  --color-on-primary: var(--primitive-palette-primary-1);
+  --color-primary-container: var(--primitive-palette-primary-9);
+  --color-on-primary-container: var(--primitive-palette-primary-3);
+  --color-tertiary: var(--primitive-palette-tertiary-4);
+  --color-on-tertiary: var(--primitive-palette-tertiary-13);
+  --color-error: var(--primitive-palette-error-4);
+  --color-on-error: var(--primitive-palette-error-13);
+  --elevation-card: 0 1px 3px color-mix(in srgb, var(--primitive-palette-neutral-1) 4%, transparent), 0 1px 2px color-mix(in srgb, var(--primitive-palette-neutral-1) 3%, transparent);
+  --elevation-card-hover: 0 6px 16px color-mix(in srgb, var(--primitive-palette-neutral-1) 8%, transparent);
+  --elevation-surface: 0 2px 8px -2px color-mix(in srgb, var(--primitive-palette-neutral-1) 6%, transparent), 0 1px 4px -1px color-mix(in srgb, var(--primitive-palette-neutral-1) 4%, transparent);
 }
 
 /* ==========================================================================

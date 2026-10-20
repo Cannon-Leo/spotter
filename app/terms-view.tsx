@@ -1,38 +1,28 @@
+'use client';
+
 import React from 'react';
-import type { Metadata } from 'next';
-import Link from 'next/link';
-import ThemeToggle from '../theme-toggle';
-import Footer from '../footer';
-import styles from '../legal.module.css';
+import ThemeToggle from './theme-toggle';
+import styles from './legal.module.css';
+import SpotterLogo from './spotter-logo';
 
-export const metadata: Metadata = {
-  title: 'Terms of Service',
-  description: 'Spotter Member Terms of Service governed under the laws of the Federal Republic of Nigeria.',
-};
+interface TermsViewProps {
+  onBack: () => void;
+}
 
-export default function TermsOfServicePage() {
+export default function TermsView({ onBack }: TermsViewProps) {
   return (
     <div className={styles.legalPageRoot}>
       {/* Top Header Navigation */}
-      <nav className={styles.legalTopNav} aria-label="Terms page navigation">
-        <Link href="/" className={styles.backHomeLink} aria-label="Return to Spotter Home">
-          <span className={styles.brandLogoSquare} aria-hidden="true">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#ffffff"
-              strokeWidth="2.75"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M18 6 6 18" />
-              <path d="m6 6 12 12" />
-            </svg>
-          </span>
+      <nav className={styles.legalTopNav} aria-label="Terms view navigation">
+        <button
+          type="button"
+          onClick={onBack}
+          className={styles.backHomeBtn}
+          aria-label="Return to Spotter Home"
+        >
+          <SpotterLogo size={28} />
           <span>&larr; Return to Spotter</span>
-        </Link>
+        </button>
         <div className={styles.navRight}>
           <ThemeToggle />
         </div>
@@ -224,18 +214,14 @@ export default function TermsOfServicePage() {
                 >
                   Contact Desk Officer on WhatsApp &rarr;
                 </a>
-                <Link href="/" className={styles.secondaryActionBtn}>
-                  Return to Home
-                </Link>
+                <button type="button" onClick={onBack} className={styles.secondaryActionBtn}>
+                  Return to Overview
+                </button>
               </div>
             </section>
           </div>
         </article>
       </main>
-
-      {/* Footer */}
-      <Footer />
     </div>
   );
 }
-

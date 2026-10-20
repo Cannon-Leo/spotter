@@ -4,6 +4,7 @@ import Link from 'next/link';
 import ThemeToggle from '../theme-toggle';
 import Footer from '../footer';
 import styles from '../auth.module.css';
+import SpotterLogo from '../spotter-logo';
 
 export const metadata: Metadata = {
   title: 'Reset Password / PIN',
@@ -29,21 +30,7 @@ export default function ResetPasswordPage() {
         <div className={styles.authCard}>
           <div className={styles.cardHeader}>
             <div className={styles.logoRow}>
-              <span className={styles.brandLogoSquare} aria-hidden="true">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#ffffff"
-                  strokeWidth="2.75"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M18 6 6 18" />
-                  <path d="m6 6 12 12" />
-                </svg>
-              </span>
+              <SpotterLogo size={32} />
               <span className={styles.brandTitle}>Spotter</span>
             </div>
             <h1 className={styles.cardTitle}>Reset Your 4-Digit Security PIN</h1>

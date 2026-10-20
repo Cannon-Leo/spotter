@@ -13,9 +13,15 @@
 }
 
 .legalTopNav {
-  max-width: 1140px;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0px;
+  z-index: 1000;
   width: 100%;
-  margin: 0 auto;
+  background-color: color-mix(in srgb, var(--color-background) 85%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--color-outline-variant);
   padding: var(--space-4) var(--space-6);
   display: flex;
   justify-content: space-between;
@@ -40,6 +46,22 @@
   transition: color var(--motion-duration-fast) var(--motion-ease-standard);
 }
 
+.backHomeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-on-background);
+  font-family: var(--typography-label-large-font-family);
+  font-size: var(--typography-label-large-font-size);
+  font-weight: 600;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.backHomeBtn:hover,
 .backHomeLink:hover {
   color: var(--color-secondary);
 }
