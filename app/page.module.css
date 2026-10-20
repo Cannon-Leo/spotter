@@ -384,13 +384,14 @@
   flex-direction: column;
   gap: var(--space-2);
   box-shadow: var(--elevation-card);
-  transition: border-color var(--motion-duration-fast) var(--motion-ease-standard),
-              box-shadow var(--motion-duration-fast) var(--motion-ease-standard);
+  transition: border-color var(--motion-duration-slow) var(--motion-ease-standard),
+              box-shadow var(--motion-duration-slow) var(--motion-ease-standard);
 }
 
 .featureCard:hover {
   border-color: var(--color-secondary);
-  box-shadow: var(--elevation-card-hover);
+  /* Hover lifts the tile with the design system's soft brand shadow. */
+  box-shadow: var(--shadow-soft);
 }
 
 /* Five tiles: the last row holds exactly two, so both widen to half width
