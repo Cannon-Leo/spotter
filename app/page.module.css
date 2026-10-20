@@ -402,7 +402,7 @@
 .infoCard {
   background-color: var(--color-surface-container-lowest);
   border: 1px solid var(--color-outline-variant);
-  border-left: 3px solid #2563eb;
+  border-left: 3px solid var(--color-secondary);
   border-radius: var(--radius-sm);
   padding: var(--space-4) var(--space-5);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
@@ -417,7 +417,7 @@
 }
 
 .infoHighlight {
-  color: #2563eb;
+  color: var(--color-secondary);
   font-weight: 700;
 }
 
