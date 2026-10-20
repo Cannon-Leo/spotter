@@ -1,0 +1,182 @@
+/* ==============================================================================
+ * Spotter Footer Styles
+ * Designed strictly using design system tokens with full accessibility compliance
+ * ============================================================================== */
+
+.footerRoot {
+  width: 100%;
+  margin-top: var(--space-16);
+  border-top: 1px solid var(--color-outline-variant);
+  padding-top: var(--space-12);
+  padding-bottom: var(--space-8);
+  background-color: transparent;
+}
+
+.footerContainer {
+  max-width: 1140px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-6);
+  padding-right: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+
+@media (max-width: 768px) {
+  .footerContainer {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+    gap: var(--space-8);
+  }
+}
+
+.footerGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.2fr;
+  gap: var(--space-8);
+}
+
+@media (max-width: 900px) {
+  .footerGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+  }
+}
+
+@media (max-width: 600px) {
+  .footerGrid {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+}
+
+.brandCol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.brandLogoRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+}
+
+.brandLogoSquare {
+  width: 32px;
+  height: 32px;
+  background-color: var(--color-secondary);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brandName {
+  font-family: var(--typography-title-medium-font-family);
+  font-size: var(--typography-title-medium-font-size);
+  font-weight: 700;
+  color: var(--color-on-background);
+  letter-spacing: -0.5px;
+}
+
+.brandDesc {
+  font-family: var(--typography-body-small-font-family);
+  font-size: var(--typography-body-small-font-size);
+  line-height: 1.6;
+  color: var(--color-on-surface-variant);
+  margin: 0;
+  max-width: 360px;
+}
+
+.complianceBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background-color: var(--color-surface-container-low);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-full);
+  padding: var(--space-1) var(--space-3);
+  font-family: var(--typography-label-small-font-family, var(--typography-body-small-font-family));
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-secondary);
+  width: fit-content;
+  margin-top: var(--space-1);
+}
+
+.colTitle {
+  font-family: var(--typography-label-large-font-family);
+  font-size: var(--typography-label-medium-font-size);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--color-on-background);
+  margin: 0 0 var(--space-3) 0;
+}
+
+.linkList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.footerLink {
+  font-family: var(--typography-body-small-font-family);
+  font-size: var(--typography-body-small-font-size);
+  line-height: 1.5;
+  color: var(--color-on-surface-variant);
+  text-decoration: none;
+  transition: color var(--motion-duration-fast) var(--motion-ease-standard);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.footerLink:hover {
+  color: var(--color-secondary);
+  text-decoration: underline;
+}
+
+.footerLink:focus-visible {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+.infoNote {
+  font-family: var(--typography-body-small-font-family);
+  font-size: var(--typography-body-small-font-size);
+  line-height: 1.5;
+  color: var(--color-on-surface-variant);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.footerBottom {
+  border-top: 1px solid var(--color-outline-variant);
+  padding-top: var(--space-6);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-family: var(--typography-body-small-font-family);
+  font-size: var(--typography-body-small-font-size);
+  color: var(--color-on-surface-variant);
+}
+
+.copyrightText {
+  margin: 0;
+}
+
+.bottomLinks {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}

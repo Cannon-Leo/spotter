@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ThemeToggle from './theme-toggle';
 import styles from './page.module.css';
+import Footer from './footer';
 
 interface MemberSessionInfo {
   id: string;
@@ -194,6 +195,8 @@ export default function SpotterHome() {
           </div>
         </section>
       </div>
+
+      <Footer />
     </div>
   );
 }
