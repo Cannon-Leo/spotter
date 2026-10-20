@@ -12,6 +12,7 @@
   display: flex;
   flex-direction: column;
   position: relative;
+  overflow-x: hidden;
 }
 
 /* Keyboard-only shortcut past the navigation. Visible on focus, never otherwise. */
@@ -56,6 +57,8 @@
   scroll-margin-top: var(--space-4);
   /* Focus target of the skip link, not an interactive control: no ring needed. */
   outline: none;
+  position: relative;
+  z-index: 1;
 }
 
 @media (max-width: 768px) {

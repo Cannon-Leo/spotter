@@ -5,6 +5,7 @@ import Link from 'next/link';
 import ThemeToggle from './theme-toggle';
 import styles from './page.module.css';
 import Footer from './footer';
+import StripedBackground from './striped-background';
 
 interface MemberSessionInfo {
   id: string;
@@ -70,6 +71,7 @@ export default function SpotterHome() {
 
   return (
     <div className={styles.pageRoot}>
+      <StripedBackground />
       <a href="#main-content" className={styles.skipLink}>
         Skip to main content
       </a>
