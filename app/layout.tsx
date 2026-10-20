@@ -33,6 +33,10 @@ const themeInitScript = `
       : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     document.documentElement.setAttribute('data-theme', theme);
     document.documentElement.style.colorScheme = theme;
+    // Browser chrome follows the same decision as the page.
+    var color = theme === 'dark' ? '#161d1a' : '#ffffff';
+    var metas = document.querySelectorAll('meta[name="theme-color"]');
+    for (var i = 0; i < metas.length; i++) metas[i].setAttribute('content', color);
   } catch (e) {}
 })();
 `;
@@ -45,9 +49,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={dmSans.className} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-        <meta name="theme-color" content="#f6fef9" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#161d1a" media="(prefers-color-scheme: dark)" />
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <link rel="icon" href="/favicon.ico" />
         <link rel="shortcut icon" href="/icon.svg" />

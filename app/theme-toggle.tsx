@@ -6,6 +6,11 @@ type Theme = 'light' | 'dark';
 
 const STORAGE_KEY = 'spotter-theme';
 
+/** The document attribute is the source of truth, not React state. */
+function readTheme(): Theme {
+  return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+}
+
 function readStoredTheme(): Theme | null {
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
@@ -15,29 +20,36 @@ function readStoredTheme(): Theme | null {
   }
 }
 
-function resolveTheme(): Theme {
-  const attr = document.documentElement.dataset.theme;
-  if (attr === 'dark' || attr === 'light') return attr;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
-
 function applyTheme(theme: Theme) {
-  document.documentElement.dataset.theme = theme;
-  document.documentElement.style.colorScheme = theme;
+  const root = document.documentElement;
+  root.dataset.theme = theme;
+  root.style.colorScheme = theme;
+
+  // The two media-scoped theme-color metas cannot see an explicit choice, so
+  // both are re-pointed at the background colour actually in force.
+  // Reading the role keeps this token driven instead of duplicating a hex.
+  const background = getComputedStyle(root).getPropertyValue('--color-background').trim();
+  if (background) {
+    document
+      .querySelectorAll('meta[name="theme-color"]')
+      .forEach((meta) => meta.setAttribute('content', background));
+  }
 }
 
 /**
  * System-wide light / dark switch.
  *
- * The initial theme is set before paint by the inline script in app/layout.tsx,
- * so this component only has to read that value and write explicit choices back
- * to it. Until the member chooses, the control keeps following the OS setting.
+ * The pre-paint script in app/layout.tsx sets data-theme before the first
+ * frame. This control never assumes what that value was: every click reads the
+ * live attribute, flips it, writes it back and then mirrors it into state for
+ * the icon. That way a slow or failed hydration can never leave the button
+ * toggling a stale value, and the first click always changes what is on screen.
  */
 export default function ThemeToggle() {
   const [theme, setTheme] = useState<Theme>('light');
 
   useEffect(() => {
-    setTheme(resolveTheme());
+    setTheme(readTheme());
 
     const media = window.matchMedia('(prefers-color-scheme: dark)');
     const handleSystemChange = (event: MediaQueryListEvent) => {
@@ -53,16 +65,14 @@ export default function ThemeToggle() {
   }, []);
 
   const toggleTheme = useCallback(() => {
-    setTheme((current) => {
-      const next: Theme = current === 'dark' ? 'light' : 'dark';
-      applyTheme(next);
-      try {
-        window.localStorage.setItem(STORAGE_KEY, next);
-      } catch {
-        // Private browsing: the choice simply lasts for this page view.
-      }
-      return next;
-    });
+    const next: Theme = readTheme() === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    setTheme(next);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, next);
+    } catch {
+      // Private browsing: the choice simply lasts for this page view.
+    }
   }, []);
 
   const isDark = theme === 'dark';
