@@ -48,6 +48,9 @@
   margin-right: auto;
   padding-left: var(--space-6);
   padding-right: var(--space-6);
+  /* Keeps the closing card section off the bottom edge now that nothing
+     follows it. */
+  padding-bottom: var(--space-12);
   display: flex;
   flex-direction: column;
   scroll-margin-top: var(--space-4);
@@ -487,36 +490,6 @@
 .cardLink:hover {
   opacity: 0.85;
 }
-/* --------------------------------------------------------------------------
- * Info Section (Privacy Callout with a 160px margin below Card Section)
- * -------------------------------------------------------------------------- */
-.infoSection {
-  margin-top: var(--space-40);
-  padding-bottom: var(--space-12);
-  width: 100%;
-}
-
-.infoCard {
-  background-color: var(--color-surface-container-lowest);
-  border: 1px solid var(--color-outline-color);
-  border-left: 3px solid var(--color-secondary);
-  border-radius: var(--radius-sm);
-  padding: var(--space-4) var(--space-5);
-  box-shadow: var(--elevation-card);
-}
-
-.infoText {
-  font-family: var(--typography-body-medium-font-family);
-  font-size: var(--typography-body-medium-font-size);
-  line-height: 1.6;
-  color: var(--color-on-background);
-  margin: 0;
-}
-
-.infoHighlight {
-  color: var(--color-secondary);
-  font-weight: 700;
-}
 
 /* --------------------------------------------------------------------------
  * Auth Modals & Overlays
@@ -683,10 +656,6 @@
   .featuresSection {
     margin-top: var(--space-18);
   }
-
-  .infoSection {
-    margin-top: var(--space-24);
-  }
 }
 
 @media (max-width: 640px) {
@@ -712,11 +681,6 @@
 
   .sectionHeader {
     margin-bottom: var(--space-4);
-  }
-
-  .infoSection {
-    margin-top: var(--space-10);
-    padding-bottom: var(--space-8);
   }
 
   .userBanner {
