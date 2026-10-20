@@ -3151,6 +3151,10 @@
       }
     },
     "light": {
+      "background": {
+        "type": "color",
+        "value": "{primitives.color palettes.neutral.neutral 13}"
+      },
       "secondary": {
         "type": "color",
         "value": "{primitives.color palettes.secondary.secondary 3}"
