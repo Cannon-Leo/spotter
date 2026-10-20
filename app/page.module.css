@@ -344,10 +344,11 @@
 }
 
 .sectionTitle {
-  font-family: var(--typography-headline-large-font-family);
+  font-family: var(--typography-headline-medium-font-family);
   font-size: var(--typography-headline-medium-font-size);
-  font-weight: 800;
-  letter-spacing: -0.5px;
+  line-height: var(--typography-headline-medium-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--typography-headline-medium-letter-spacing);
   color: var(--color-on-background);
 }
 
@@ -442,14 +443,18 @@
 .cardNumber {
   font-family: var(--typography-label-large-font-family);
   font-size: var(--typography-label-large-font-size);
-  font-weight: 800;
+  line-height: var(--typography-label-large-line-height);
+  font-weight: var(--font-weight-extra-bold);
+  letter-spacing: var(--typography-label-large-letter-spacing);
   color: var(--color-secondary);
 }
 
 .cardTitle {
-  font-family: var(--typography-title-large-font-family);
+  font-family: var(--typography-title-medium-font-family);
   font-size: var(--typography-title-medium-font-size);
-  font-weight: 700;
+  line-height: var(--typography-title-medium-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--typography-title-medium-letter-spacing);
   color: var(--color-on-background);
   text-wrap: balance;
 }
@@ -470,7 +475,9 @@
   color: var(--color-secondary);
   font-family: var(--typography-label-medium-font-family);
   font-size: var(--typography-label-medium-font-size);
-  font-weight: 700;
+  line-height: var(--typography-label-medium-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--typography-label-medium-letter-spacing);
   text-decoration: underline;
   display: inline-flex;
   align-items: center;
@@ -730,6 +737,7 @@
 
   .sectionTitle {
     font-size: var(--typography-headline-small-font-size);
+    letter-spacing: var(--typography-headline-small-letter-spacing);
   }
 }
 
