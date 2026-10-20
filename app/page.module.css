@@ -7,10 +7,33 @@
 .pageRoot {
   min-height: 100vh;
   width: 100%;
-  background-color: var(--color-surface-container-lowest);
+  background-color: var(--color-background);
   color: var(--color-on-background);
   display: flex;
   flex-direction: column;
+  position: relative;
+}
+
+/* Keyboard-only shortcut past the navigation. Visible on focus, never otherwise. */
+.skipLink {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: 1100;
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--color-secondary);
+  color: var(--color-on-secondary);
+  border-radius: var(--radius-sm);
+  font-family: var(--typography-label-large-font-family);
+  font-size: var(--typography-label-large-font-size);
+  font-weight: 700;
+  text-decoration: underline;
+  transform: translateY(-200%);
+  transition: transform var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.skipLink:focus-visible {
+  transform: translateY(0);
 }
 
 /* --------------------------------------------------------------------------
@@ -25,6 +48,9 @@
   padding-right: var(--space-6);
   display: flex;
   flex-direction: column;
+  scroll-margin-top: var(--space-4);
+  /* Focus target of the skip link, not an interactive control: no ring needed. */
+  outline: none;
 }
 
 @media (max-width: 768px) {
@@ -74,7 +100,19 @@
 .navActions {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  /* 1rem between the theme switch and the Get Started / Sign Out control. */
+  gap: var(--space-4);
+}
+
+.memberChip {
+  font-family: var(--typography-label-medium-font-family);
+  font-size: var(--typography-label-medium-font-size);
+  font-weight: 700;
+  color: var(--color-on-surface-variant);
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .navGetStartedBtn {
@@ -315,26 +353,27 @@
   color: var(--color-on-surface-variant);
 }
 
-/* 3-column / 2-column feature card grid matching the reference layout */
+/* --------------------------------------------------------------------------
+ * Bento grid
+ *
+ * A 6-track grid (not 3 fixed columns) so tiles can change width without
+ * scaling, cropping or stretching their contents:
+ *   desktop, 5 tiles -> 2+2+2 / 3+3    (no empty cell, no 6th tile required)
+ *   desktop, 6 tiles -> 2+2+2 / 2+2+2  (standard 3 x 2 bento, nothing resizes)
+ *   tablet,  odd count -> the odd tile closes the row at full width
+ *   phone              -> one column, every tile full width
+ * -------------------------------------------------------------------------- */
 .cardsGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: var(--space-5);
-}
-
-@media (max-width: 960px) {
-  .cardsGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 640px) {
-  .cardsGrid {
-    grid-template-columns: 1fr;
-  }
+  align-items: stretch;
 }
 
 .featureCard {
+  /* Base tile: two of six tracks, i.e. one third of the row. */
+  grid-column: span 2;
+  min-width: 0;
   background-color: var(--color-surface-container-lowest);
   border: 1px solid var(--color-outline-variant);
   border-radius: var(--radius-md);
@@ -342,15 +381,55 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.02);
-  transition: transform var(--motion-duration-fast) var(--motion-ease-standard),
-              border-color var(--motion-duration-fast) var(--motion-ease-standard),
+  box-shadow: var(--elevation-card);
+  transition: border-color var(--motion-duration-fast) var(--motion-ease-standard),
               box-shadow var(--motion-duration-fast) var(--motion-ease-standard);
 }
 
 .featureCard:hover {
   border-color: var(--color-secondary);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--elevation-card-hover);
+}
+
+/* Five tiles: the last row holds exactly two, so both widen to half width
+ * and the section closes flush. With six tiles this cannot match, which is
+ * what keeps the 3 x 2 bento intact when a card is added. */
+@media (min-width: 961px) {
+  .featureCard:nth-child(3n + 1):nth-last-child(2),
+  .featureCard:nth-child(3n + 1):nth-last-child(2) + .featureCard {
+    grid-column: span 3;
+  }
+
+  /* A lone final tile always closes the row rather than leaving a hole. */
+  .featureCard:last-child:nth-child(3n + 1) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 960px) {
+  .cardsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
+  .featureCard {
+    grid-column: span 1;
+  }
+
+  /* Odd number of tiles: the odd one out closes the row. */
+  .featureCard:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .cardsGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .featureCard {
+    grid-column: 1 / -1;
+  }
 }
 
 .cardNumber {
@@ -365,6 +444,7 @@
   font-size: var(--typography-title-medium-font-size);
   font-weight: 700;
   color: var(--color-on-background);
+  text-wrap: balance;
 }
 
 .cardBody {
@@ -372,6 +452,9 @@
   font-size: var(--typography-body-small-font-size);
   line-height: 1.6;
   color: var(--color-on-surface-variant);
+  /* Keeps the wider bento tiles readable instead of stretching lines edge to edge. */
+  max-width: 58ch;
+  text-wrap: pretty;
 }
 
 .cardLink {
@@ -405,7 +488,7 @@
   border-left: 3px solid var(--color-secondary);
   border-radius: var(--radius-sm);
   padding: var(--space-4) var(--space-5);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--elevation-card);
 }
 
 .infoText {
@@ -427,7 +510,7 @@
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgb(0 0 0 / 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -555,12 +638,87 @@
 
 /* User status / logged in banner */
 .userBanner {
-  background-color: var(--color-surface-container-high);
+  background-color: var(--color-surface-container-lowest);
   border: 1px solid var(--color-secondary);
   border-radius: var(--radius-sm);
   padding: var(--space-3) var(--space-4);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--space-2);
   margin-top: var(--space-4);
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
+
+.userBannerMeta {
+  font-family: var(--typography-body-small-font-family);
+  font-size: var(--typography-body-small-font-size);
+  color: var(--color-on-surface-variant);
+}
+
+/* --------------------------------------------------------------------------
+ * Responsive refinements (tablet and phone)
+ * -------------------------------------------------------------------------- */
+@media (max-width: 960px) {
+  .cardSection,
+  .featuresSection {
+    margin-top: 4.5rem;
+  }
+
+  .infoSection {
+    margin-top: 6rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .navbar {
+    padding-top: var(--space-4);
+    padding-bottom: var(--space-4);
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+
+  .heroSection {
+    padding-top: var(--space-8);
+  }
+
+  .heroHeadline {
+    letter-spacing: -1.5px;
+  }
+
+  .cardSection,
+  .featuresSection {
+    margin-top: var(--space-10);
+  }
+
+  .sectionHeader {
+    margin-bottom: var(--space-4);
+  }
+
+  .infoSection {
+    margin-top: var(--space-10);
+    padding-bottom: var(--space-8);
+  }
+
+  .userBanner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .modalCard {
+    padding: var(--space-4);
+  }
+}
+
+@media (max-width: 400px) {
+  .navGetStartedBtn,
+  .navSignOutBtn {
+    padding: 0.75rem 0.875rem;
+  }
+
+  .sectionTitle {
+    font-size: var(--typography-headline-small-font-size);
+  }
+}
+

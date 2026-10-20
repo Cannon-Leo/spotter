@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import ThemeToggle from './theme-toggle';
 import styles from './page.module.css';
 
 interface MemberSessionInfo {
@@ -68,25 +69,29 @@ export default function SpotterHome() {
 
   return (
     <div className={styles.pageRoot}>
+      <a href="#main-content" className={styles.skipLink}>
+        Skip to main content
+      </a>
       {/* --------------------------------------------------------------------
        * Contained Layout (Centered max-width: 1140px, never stretches 100vw)
        * -------------------------------------------------------------------- */}
-      <div className={styles.container}>
+      <div className={styles.container} id="main-content" tabIndex={-1}>
         {/* Top Navbar */}
         <header className={styles.navbar} role="banner">
           <div className={styles.navBrand}>
             <Link href="/" aria-label="Spotter Home" className={styles.brandLogoSquare}>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="36" height="36" aria-hidden="true">
-                <rect width="32" height="32" rx="6" fill="#008f70" />
-                <text x="50%" y="54%" textAnchor="middle" dominantBaseline="middle" fill="#ffffff" font-family="'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="20">S</text>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="36" height="36" aria-hidden="true" focusable="false">
+                <rect width="32" height="32" rx="6" fill="var(--color-secondary)" />
+                <text x="50%" y="54%" textAnchor="middle" dominantBaseline="middle" fill="var(--color-on-secondary)" fontFamily="'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" fontWeight="800" fontSize="20">S</text>
               </svg>
             </Link>
           </div>
 
           <div className={styles.navActions}>
+            <ThemeToggle />
             {session ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-                <span style={{ fontSize: 'var(--typography-label-medium-font-size)', fontWeight: 600, color: 'var(--color-secondary)' }}>
+              <>
+                <span className={styles.memberChip}>
                   Member #{session.id.slice(0, 5)} ({session.effectiveTier})
                 </span>
                 <button
@@ -97,7 +102,7 @@ export default function SpotterHome() {
                 >
                   Sign Out
                 </button>
-              </div>
+              </>
             ) : (
               <Link
                 href="/create-account"
@@ -149,7 +154,7 @@ export default function SpotterHome() {
               <div>
                 <strong>Active Session:</strong> Logged in as Member #{session.id.slice(0, 5)} &bull; {session.effectiveTier} Tier
               </div>
-              <span style={{ fontSize: 'var(--typography-body-small-font-size)', color: 'var(--color-secondary)' }}>
+              <span className={styles.userBannerMeta}>
                 Session verified &bull; 0 days trained this month
               </span>
             </div>
@@ -157,19 +162,20 @@ export default function SpotterHome() {
         </section>
 
         {/* Card Section */}
-        <section className={styles.cardSection} aria-label="Card Section">
+        <section className={styles.cardSection} aria-labelledby="features-heading">
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Built For Member Independence</h2>
+            <h2 className={styles.sectionTitle} id="features-heading">Built For Member Independence</h2>
             <p className={styles.sectionSubtitle}>
               Five core features with zero clutter, zero ads, and instant confirmation.
             </p>
           </div>
 
-          {/* 5 Feature Cards Grid (3 top, 2 bottom) */}
+          {/* Bento grid: 5 tiles tile the full width with no hole, and a 6th tile
+              drops into the standard 3 x 2 pattern without resizing anything. */}
           <div className={styles.cardsGrid}>
             {FEATURES.map((item) => (
               <article key={item.number} className={styles.featureCard}>
-                <span className={styles.cardNumber}>{item.number}</span>
+                <span className={styles.cardNumber} aria-hidden="true">{item.number}</span>
                 <h3 className={styles.cardTitle}>{item.title}</h3>
                 <p className={styles.cardBody}>{item.body}</p>
                 {item.link && (
@@ -189,7 +195,7 @@ export default function SpotterHome() {
         </section>
 
         {/* Info Section */}
-        <section className={styles.infoSection} aria-label="Privacy and Member Records Notice">
+        <section className={styles.infoSection} aria-label="Privacy and member records notice">
           <div className={styles.infoCard}>
             <p className={styles.infoText}>
               <strong className={styles.infoHighlight}>Private by design.</strong>{' '}

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import ThemeToggle from '../theme-toggle';
 import styles from '../auth.module.css';
 
 export default function LoginPage() {
@@ -57,7 +58,10 @@ export default function LoginPage() {
           <Link href="/" className={styles.backLink}>
             &larr; Back to Spotter
           </Link>
-          <span className={styles.topBarBadge}>Official Member App</span>
+          <span className={styles.authTopBarMeta}>
+            <span className={styles.topBarBadge}>Official Member App</span>
+            <ThemeToggle />
+          </span>
         </div>
 
         {/* Login Card */}
