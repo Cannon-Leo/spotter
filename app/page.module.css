@@ -330,7 +330,7 @@
  * -------------------------------------------------------------------------- */
 .cardSection,
 .featuresSection {
-  margin-top: 6rem;
+  margin-top: var(--space-24);
   padding-bottom: 0;
   display: flex;
   flex-direction: column;
@@ -488,10 +488,10 @@
   opacity: 0.85;
 }
 /* --------------------------------------------------------------------------
- * Info Section (Privacy Callout with 10rem margin below Card Section)
+ * Info Section (Privacy Callout with a 160px margin below Card Section)
  * -------------------------------------------------------------------------- */
 .infoSection {
-  margin-top: 10rem;
+  margin-top: var(--space-40);
   padding-bottom: var(--space-12);
   width: 100%;
 }
@@ -681,11 +681,11 @@
 @media (max-width: 960px) {
   .cardSection,
   .featuresSection {
-    margin-top: 4.5rem;
+    margin-top: var(--space-18);
   }
 
   .infoSection {
-    margin-top: 6rem;
+    margin-top: var(--space-24);
   }
 }
 
@@ -702,7 +702,7 @@
   }
 
   .heroHeadline {
-    letter-spacing: -1.5px;
+    letter-spacing: var(--typography-display-small-letter-spacing);
   }
 
   .cardSection,
@@ -732,7 +732,7 @@
 @media (max-width: 400px) {
   .navGetStartedBtn,
   .navSignOutBtn {
-    padding: 0.75rem 0.875rem;
+    padding: var(--space-3) var(--space-4);
   }
 
   .sectionTitle {
