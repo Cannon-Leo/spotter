@@ -540,7 +540,7 @@
   padding: var(--space-6);
   max-width: 440px;
   width: 100%;
-  box-shadow: var(--shadow-hard);
+  box-shadow: var(--elevation-modal);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
