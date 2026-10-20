@@ -82,7 +82,7 @@ export default function SpotterHome() {
             <Link href="/" aria-label="Spotter Home" className={styles.brandLogoSquare}>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="36" height="36" aria-hidden="true" focusable="false">
                 <rect width="32" height="32" rx="6" fill="var(--color-secondary)" />
-                <text x="50%" y="54%" textAnchor="middle" dominantBaseline="middle" fill="var(--color-on-secondary)" fontFamily="'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" fontWeight="800" fontSize="20">S</text>
+                <text x="50%" y="54%" textAnchor="middle" dominantBaseline="middle" fill="var(--color-on-secondary)" fontFamily="var(--typography-display-large-font-family)" fontWeight="var(--font-weight-extra-bold)" fontSize="20">S</text>
               </svg>
             </Link>
           </div>
