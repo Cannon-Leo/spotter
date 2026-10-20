@@ -3,131 +3,18 @@
 /* ==============================================================================
  * Spotter global theme layer
  *
- * tokens.css stays the single generated source of primitives. This file only
- * re-points COLOR ROLES (--color-*) per theme, so every component keeps using
- * the same semantic variables and automatically follows the active mode.
+ * tokens.css is generated from design-tokens.tokens.json and now owns the full
+ * theme: primitives, semantic colour roles, the light and dark mode overrides,
+ * elevation, spacing, weights and motion.
  *
- * Theming contract:
+ * Theming contract (emitted by the token pipeline, never edited here):
  *   - light theme  -> :root (default)
  *   - dark theme   -> html[data-theme="dark"]
  *   - no JavaScript + OS dark preference -> @media (prefers-color-scheme: dark)
  *
- * IMPORTANT: the two dark blocks below must stay identical. The attribute block
- * serves the explicit toggle; the media block only covers no-JS visitors.
+ * This file only holds the reset, shared element defaults and accessibility
+ * helpers, so a component never needs to know which mode is active.
  * ============================================================================== */
-
-:root {
-  /* Native form controls, scrollbars and caret follow the light theme. */
-  color-scheme: light;
-
-  /* Light theme role refinements.
-   * secondary-4 (#008f70) only reaches 4.07:1 against white, which fails WCAG AA
-   * for the 14px button and link text this design system uses. secondary-3
-   * (#00513e, same brand hue) reaches 9.3:1 while staying inside the palette. */
-  --color-secondary: var(--primitive-palette-secondary-3);
-  --color-on-secondary: var(--primitive-palette-secondary-13);
-
-  /* White on primary-4 (#00e3aa) is 1.6:1; the palette's own dark step fixes it. */
-  --color-on-primary: var(--primitive-palette-primary-1);
-
-  /* Mode-aware elevation (the generated shadows are brand tinted, not neutral). */
-  --elevation-card: 0 1px 3px rgba(22, 29, 26, 0.04), 0 1px 2px rgba(22, 29, 26, 0.03);
-  --elevation-card-hover: 0 6px 16px rgba(22, 29, 26, 0.08);
-  --elevation-surface: 0 2px 8px -2px rgba(22, 29, 26, 0.06), 0 1px 4px -1px rgba(22, 29, 26, 0.04);
-}
-
-html[data-theme="dark"] {
-  color-scheme: dark;
-
-  --color-background: var(--primitive-palette-neutral-1);
-  --color-on-background: var(--primitive-palette-neutral-12);
-  --color-surface: var(--primitive-palette-neutral-2);
-  --color-on-surface: var(--primitive-palette-neutral-12);
-  --color-surface-variant: var(--primitive-palette-neutral-3);
-  --color-on-surface-variant: var(--primitive-palette-neutral-8);
-  --color-surface-container-lowest: var(--primitive-palette-neutral-2);
-  --color-surface-container-low: var(--primitive-palette-neutral-2);
-  --color-surface-container: var(--primitive-palette-neutral-3);
-  --color-surface-container-high: var(--primitive-palette-neutral-1);
-  --color-surface-container-highest: var(--primitive-palette-neutral-3);
-  --color-surface-bright: var(--primitive-palette-neutral-12);
-  --color-surface-dim: var(--primitive-palette-neutral-1);
-  --color-inverse-surface: var(--primitive-palette-neutral-12);
-  --color-inverse-on-surface: var(--primitive-palette-neutral-1);
-  --color-outline-color: var(--primitive-palette-neutral-var-7);
-  --color-outline-variant: var(--primitive-palette-neutral-var-5);
-  --color-secondary: var(--primitive-palette-secondary-7);
-  --color-on-secondary: var(--primitive-palette-secondary-1);
-  --color-secondary-container: var(--primitive-palette-secondary-2);
-  --color-on-secondary-container: var(--primitive-palette-secondary-10);
-  --color-primary: var(--primitive-palette-primary-8);
-  --color-on-primary: var(--primitive-palette-primary-1);
-  --color-primary-container: var(--primitive-palette-primary-2);
-  --color-on-primary-container: var(--primitive-palette-primary-9);
-  --color-tertiary: var(--primitive-palette-tertiary-7);
-  --color-on-tertiary: var(--primitive-palette-tertiary-1);
-  --color-tertiary-container: var(--primitive-palette-tertiary-2);
-  --color-on-tertiary-container: var(--primitive-palette-tertiary-9);
-  --color-error: var(--primitive-palette-error-7);
-  --color-on-error: var(--primitive-palette-error-1);
-  --color-error-container: var(--primitive-palette-error-1);
-  --color-on-error-container: var(--primitive-palette-error-9);
-  --color-surface-tint: var(--primitive-palette-secondary-7);
-  --color-shadow: var(--primitive-palette-neutral-0);
-  --color-scrim: var(--primitive-palette-neutral-0);
-
-  --elevation-card: 0 1px 2px rgba(0, 0, 0, 0.5);
-  --elevation-card-hover: 0 8px 20px rgba(0, 0, 0, 0.55);
-  --elevation-surface: 0 4px 14px rgba(0, 0, 0, 0.5);
-}
-
-/* No-JS fallback: follow the operating system. Keep in sync with the block above. */
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme="light"]) {
-    color-scheme: dark;
-
-    --color-background: var(--primitive-palette-neutral-1);
-    --color-on-background: var(--primitive-palette-neutral-12);
-    --color-surface: var(--primitive-palette-neutral-2);
-    --color-on-surface: var(--primitive-palette-neutral-12);
-    --color-surface-variant: var(--primitive-palette-neutral-3);
-    --color-on-surface-variant: var(--primitive-palette-neutral-8);
-    --color-surface-container-lowest: var(--primitive-palette-neutral-2);
-    --color-surface-container-low: var(--primitive-palette-neutral-2);
-    --color-surface-container: var(--primitive-palette-neutral-3);
-    --color-surface-container-high: var(--primitive-palette-neutral-1);
-    --color-surface-container-highest: var(--primitive-palette-neutral-3);
-    --color-surface-bright: var(--primitive-palette-neutral-12);
-    --color-surface-dim: var(--primitive-palette-neutral-1);
-    --color-inverse-surface: var(--primitive-palette-neutral-12);
-    --color-inverse-on-surface: var(--primitive-palette-neutral-1);
-    --color-outline-color: var(--primitive-palette-neutral-var-7);
-    --color-outline-variant: var(--primitive-palette-neutral-var-5);
-    --color-secondary: var(--primitive-palette-secondary-7);
-    --color-on-secondary: var(--primitive-palette-secondary-1);
-    --color-secondary-container: var(--primitive-palette-secondary-2);
-    --color-on-secondary-container: var(--primitive-palette-secondary-10);
-    --color-primary: var(--primitive-palette-primary-8);
-    --color-on-primary: var(--primitive-palette-primary-1);
-    --color-primary-container: var(--primitive-palette-primary-2);
-    --color-on-primary-container: var(--primitive-palette-primary-9);
-    --color-tertiary: var(--primitive-palette-tertiary-7);
-    --color-on-tertiary: var(--primitive-palette-tertiary-1);
-    --color-tertiary-container: var(--primitive-palette-tertiary-2);
-    --color-on-tertiary-container: var(--primitive-palette-tertiary-9);
-    --color-error: var(--primitive-palette-error-7);
-    --color-on-error: var(--primitive-palette-error-1);
-    --color-error-container: var(--primitive-palette-error-1);
-    --color-on-error-container: var(--primitive-palette-error-9);
-    --color-surface-tint: var(--primitive-palette-secondary-7);
-    --color-shadow: var(--primitive-palette-neutral-0);
-    --color-scrim: var(--primitive-palette-neutral-0);
-
-    --elevation-card: 0 1px 2px rgba(0, 0, 0, 0.5);
-    --elevation-card-hover: 0 8px 20px rgba(0, 0, 0, 0.55);
-    --elevation-surface: 0 4px 14px rgba(0, 0, 0, 0.5);
-  }
-}
 
 /* ==============================================================================
  * Base reset

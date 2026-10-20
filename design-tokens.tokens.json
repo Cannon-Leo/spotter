@@ -3142,5 +3142,207 @@
         "value": "none"
       }
     }
+  },
+  "modes": {
+    "shared": {
+      "on primary": {
+        "type": "color",
+        "value": "{primitives.color palettes.primary.primary 1}"
+      }
+    },
+    "light": {
+      "secondary": {
+        "type": "color",
+        "value": "{primitives.color palettes.secondary.secondary 3}"
+      },
+      "on secondary": {
+        "type": "color",
+        "value": "{primitives.color palettes.secondary.secondary 13}"
+      }
+    },
+    "dark": {
+      "background": {
+        "type": "color",
+        "value": "{primitives.color palettes.neutral.neutral 1}"
+      },
+      "on background": {
+        "type": "color",
+        "value": "{primitives.color palettes.neutral.neutral 12}"
+      },
+      "surface": {
+        "type": "color",
+        "value": "{primitives.color palettes.neutral.neutral 2}"
+      },
+      "on surface": {
+        "type": "color",
+        "value": "{primitives.color palettes.neutral.neutral 12}"
+      },
+      "surface variant": {
+        "type": "color",
+        "value": "{primitives.color palettes.neutral.neutral 3}"
+      },
+      "on surface variant": {
+        "type": "color",
+        "value": "{primitives.color palettes.neutral.neutral 8}"
+      },
+      "surface container lowest": {
+        "type": "color",
+        "value": "{primitives.color palettes.neutral.neutral 2}"
+      },
+      "surface container low": {
+        "type": "color",
+        "value": "{primitives.color palettes.neutral.neutral 2}"
+      },
+      "surface container": {
+        "type": "color",
+        "value": "{primitives.color palettes.neutral.neutral 3}"
+      },
+      "surface container high": {
+        "type": "color",
+        "value": "{primitives.color palettes.neutral.neutral 1}"
+      },
+      "surface container highest": {
+        "type": "color",
+        "value": "{primitives.color palettes.neutral.neutral 3}"
+      },
+      "surface bright": {
+        "type": "color",
+        "value": "{primitives.color palettes.neutral.neutral 12}"
+      },
+      "surface dim": {
+        "type": "color",
+        "value": "{primitives.color palettes.neutral.neutral 1}"
+      },
+      "inverse surface": {
+        "type": "color",
+        "value": "{primitives.color palettes.neutral.neutral 12}"
+      },
+      "inverse on surface": {
+        "type": "color",
+        "value": "{primitives.color palettes.neutral.neutral 1}"
+      },
+      "outline color": {
+        "type": "color",
+        "value": "{primitives.color palettes.neutral var.neutral var 7}"
+      },
+      "outline variant": {
+        "type": "color",
+        "value": "{primitives.color palettes.neutral var.neutral var 5}"
+      },
+      "secondary": {
+        "type": "color",
+        "value": "{primitives.color palettes.secondary.secondary 7}"
+      },
+      "on secondary": {
+        "type": "color",
+        "value": "{primitives.color palettes.secondary.secondary 1}"
+      },
+      "secondary container": {
+        "type": "color",
+        "value": "{primitives.color palettes.secondary.secondary 2}"
+      },
+      "on secondary container": {
+        "type": "color",
+        "value": "{primitives.color palettes.secondary.secondary 10}"
+      },
+      "primary": {
+        "type": "color",
+        "value": "{primitives.color palettes.primary.primary 8}"
+      },
+      "on primary": {
+        "type": "color",
+        "value": "{primitives.color palettes.primary.primary 1}"
+      },
+      "primary container": {
+        "type": "color",
+        "value": "{primitives.color palettes.primary.primary 2}"
+      },
+      "on primary container": {
+        "type": "color",
+        "value": "{primitives.color palettes.primary.primary 9}"
+      },
+      "tertiary": {
+        "type": "color",
+        "value": "{primitives.color palettes.tertiary.tertiary 7}"
+      },
+      "on tertiary": {
+        "type": "color",
+        "value": "{primitives.color palettes.tertiary.tertiary 1}"
+      },
+      "tertiary container": {
+        "type": "color",
+        "value": "{primitives.color palettes.tertiary.tertiary 2}"
+      },
+      "on tertiary container": {
+        "type": "color",
+        "value": "{primitives.color palettes.tertiary.tertiary 9}"
+      },
+      "error": {
+        "type": "color",
+        "value": "{primitives.color palettes.error.error 7}"
+      },
+      "on error": {
+        "type": "color",
+        "value": "{primitives.color palettes.error.error 1}"
+      },
+      "error container": {
+        "type": "color",
+        "value": "{primitives.color palettes.error.error 1}"
+      },
+      "on error container": {
+        "type": "color",
+        "value": "{primitives.color palettes.error.error 9}"
+      },
+      "surface tint": {
+        "type": "color",
+        "value": "{primitives.color palettes.secondary.secondary 7}"
+      },
+      "shadow": {
+        "type": "color",
+        "value": "{primitives.color palettes.neutral.neutral 0}"
+      },
+      "scrim": {
+        "type": "color",
+        "value": "{primitives.color palettes.neutral.neutral 0}"
+      }
+    },
+    "elevation": {
+      "light": {
+        "card": {
+          "type": "custom-shadow",
+          "value": "0 1px 3px color-mix(in srgb, {primitives.color palettes.neutral.neutral 1} 4%, transparent), 0 1px 2px color-mix(in srgb, {primitives.color palettes.neutral.neutral 1} 3%, transparent)"
+        },
+        "card hover": {
+          "type": "custom-shadow",
+          "value": "0 6px 16px color-mix(in srgb, {primitives.color palettes.neutral.neutral 1} 8%, transparent)"
+        },
+        "surface": {
+          "type": "custom-shadow",
+          "value": "0 2px 8px -2px color-mix(in srgb, {primitives.color palettes.neutral.neutral 1} 6%, transparent), 0 1px 4px -1px color-mix(in srgb, {primitives.color palettes.neutral.neutral 1} 4%, transparent)"
+        },
+        "modal": {
+          "type": "custom-shadow",
+          "value": "6px 10px 20px color-mix(in srgb, {primitives.color palettes.primary.primary 4} 20%, transparent)"
+        }
+      },
+      "dark": {
+        "card": {
+          "type": "custom-shadow",
+          "value": "0 1px 2px color-mix(in srgb, {primitives.color palettes.neutral.neutral 0} 50%, transparent)"
+        },
+        "card hover": {
+          "type": "custom-shadow",
+          "value": "0 8px 20px color-mix(in srgb, {primitives.color palettes.neutral.neutral 0} 55%, transparent)"
+        },
+        "surface": {
+          "type": "custom-shadow",
+          "value": "0 4px 14px color-mix(in srgb, {primitives.color palettes.neutral.neutral 0} 50%, transparent)"
+        },
+        "modal": {
+          "type": "custom-shadow",
+          "value": "0 10px 24px color-mix(in srgb, {primitives.color palettes.neutral.neutral 0} 55%, transparent)"
+        }
+      }
+    }
   }
 }

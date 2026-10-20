@@ -2,6 +2,10 @@
  * build-tokens.js
  * Converts design-tokens.tokens.json to standard CSS variables.
  *
+ * The JSON is the single source of truth for primitives, colour roles, the
+ * light/dark mode overrides and elevation, so no theme value is ever
+ * hand-maintained in component or global CSS.
+ *
  * Usage:
  *   node scripts/build-tokens.js [path/to/tokens.json] [path/to/output.css]
  */
@@ -35,6 +39,18 @@ function convertTokensToCss(inputPath, outputPath) {
   const effectLines = [];
   const typographyVarLines = [];
   const typographyUtilityClasses = [];
+
+  // Replaces every {token.path} inside a value, so emitted CSS never contains
+  // a raw palette hex outside the primitive layer.
+  function resolveAliases(value) {
+    if (typeof value !== 'string') return value;
+    return value.replace(/\{([^}]+)\}/g, (match, aliasPath) => {
+      const key = aliasPath.trim();
+      if (pathToVar.has(key)) return `var(${pathToVar.get(key)})`;
+      console.warn(`[Warning] Unresolved token reference "${key}"`);
+      return match;
+    });
+  }
 
   // --------------------------------------------------------------------------
   // 1. Primitive Key Colors
@@ -75,25 +91,45 @@ function convertTokensToCss(inputPath, outputPath) {
 
     for (const [roleName, token] of Object.entries(tokens['color roles'])) {
       const varName = pathToVar.get(`color roles.${roleName}`);
-      let cssValue = token.value;
-
-      // Resolve alias like "{primitives.color palettes.primary.primary 4}" or "{color roles.primary fixed dim}"
-      const aliasMatch = typeof token.value === 'string' && token.value.match(/^\{(.+)\}$/);
-      if (aliasMatch) {
-        const targetPath = aliasMatch[1].trim();
-        if (pathToVar.has(targetPath)) {
-          cssValue = `var(${pathToVar.get(targetPath)})`;
-        } else {
-          console.warn(`[Warning] Unresolved token reference "${targetPath}" in role "${roleName}"`);
-        }
-      }
-
+      const cssValue = resolveAliases(token.value);
       colorRoleLines.push(`  ${varName}: ${cssValue};`);
     }
   }
 
   // --------------------------------------------------------------------------
-  // 4. Effects (Drop Shadows)
+  // 4. Mode Overrides (light / dark) and elevation
+  // --------------------------------------------------------------------------
+  const modes = tokens.modes || {};
+
+  function modeColorLines(group) {
+    const lines = [];
+    for (const [roleName, token] of Object.entries(group || {})) {
+      lines.push(`  --color-${toKebab(roleName)}: ${resolveAliases(token.value)};`);
+    }
+    return lines;
+  }
+
+  function elevationLines(group) {
+    const lines = [];
+    for (const [name, token] of Object.entries(group || {})) {
+      lines.push(`  --elevation-${toKebab(name)}: ${resolveAliases(token.value)};`);
+    }
+    return lines;
+  }
+
+  // `shared` values hold in both modes and only need to be declared once.
+  const sharedColorLines = modeColorLines(modes.shared);
+  const lightColorLines = modeColorLines(modes.light);
+  const darkColorLines = [...sharedColorLines, ...modeColorLines(modes.dark)];
+
+  const lightElevation = elevationLines(modes.elevation && modes.elevation.light);
+  const darkElevation = elevationLines(modes.elevation && modes.elevation.dark);
+
+  const rootModeLines = [...sharedColorLines, ...lightColorLines, ...lightElevation];
+  const darkModeLines = [...darkColorLines, ...darkElevation];
+
+  // --------------------------------------------------------------------------
+  // 5. Effects (Drop Shadows)
   // --------------------------------------------------------------------------
   if (tokens.effect) {
     for (const [effectName, token] of Object.entries(tokens.effect)) {
@@ -107,7 +143,7 @@ function convertTokensToCss(inputPath, outputPath) {
   }
 
   // --------------------------------------------------------------------------
-  // 5. Typography
+  // 6. Typography
   // --------------------------------------------------------------------------
   if (tokens.typography) {
     for (const [typeName, typeObj] of Object.entries(tokens.typography)) {
@@ -157,15 +193,24 @@ function convertTokensToCss(inputPath, outputPath) {
  *    This guarantees that theming and contrast changes apply without breaking
  *    component styles.
  *
- * 3. ELEVATION & SHADOWS (--shadow-*):
- *    Pre-configured drop shadows for cards, modals, and floating elements.
+ * 3. MODES:
+ *    Light values live on :root. Dark values are emitted on html[data-theme="dark"]
+ *    for the explicit toggle and repeated inside the prefers-color-scheme media
+ *    query so no-JS visitors still follow the operating system. Both blocks come
+ *    from the same JSON source, so they cannot drift apart.
  *
- * 4. TYPOGRAPHY (--typography-* and .type-*):
- *    Responsive font scale and typography tokens.
+ * 4. ELEVATION & SHADOWS (--shadow-* and --elevation-*):
+ *    --shadow-* are the brand glow primitives from the design file.
+ *    --elevation-* are the semantic, mode-aware shadows used by components.
+ *
+ * 5. TYPOGRAPHY (--typography-*, --font-weight-* and .type-*):
+ *    Responsive font scale, weight roles and utility classes.
  * ==============================================================================
  */
 
 :root {
+  color-scheme: light;
+
   /* ==========================================================================
    * 1. PRIMITIVE KEY COLORS (Private - Do not use in UI components)
    * ========================================================================== */
@@ -182,17 +227,22 @@ ${primitivesPaletteLines.join('\n')}
 ${colorRoleLines.join('\n')}
 
   /* ==========================================================================
-   * 4. ELEVATION & SHADOWS
+   * 4. MODE OVERRIDES (shared + light) AND ELEVATION
+   * ========================================================================== */
+${rootModeLines.join('\n')}
+
+  /* ==========================================================================
+   * 5. BRAND SHADOW PRIMITIVES (from the design file)
    * ========================================================================== */
 ${effectLines.join('\n')}
 
   /* ==========================================================================
-   * 5. TYPOGRAPHY VARIABLES
+   * 6. TYPOGRAPHY VARIABLES
    * ========================================================================== */
 ${typographyVarLines.join('\n')}
 
   /* ==========================================================================
-   * 6. SPACING, RADIUS & MOTION (Standard 4px Scale Extensions)
+   * 7. SPACING, RADIUS & MOTION (Standard 4px Scale Extensions)
    * ========================================================================== */
   --space-1: 4px;
   --space-2: 8px;
@@ -203,6 +253,12 @@ ${typographyVarLines.join('\n')}
   --space-8: 32px;
   --space-10: 40px;
   --space-12: 48px;
+  --space-16: 64px;
+  --space-18: 72px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-32: 128px;
+  --space-40: 160px;
 
   --radius-none: 0px;
   --radius-sm: 4px;
@@ -213,11 +269,37 @@ ${typographyVarLines.join('\n')}
 
   --motion-duration-fast: 150ms;
   --motion-duration-normal: 250ms;
+  --motion-duration-slow: 600ms;
   --motion-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  /* ==========================================================================
+   * 8. FONT WEIGHT ROLES (semantic emphasis scale)
+   * ========================================================================== */
+  --font-weight-regular: 500;
+  --font-weight-medium: 600;
+  --font-weight-bold: 700;
+  --font-weight-extra-bold: 800;
 }
 
 /* ==========================================================================
- * 7. TYPOGRAPHY UTILITY CLASSES
+ * 9. DARK MODE
+ * Generated from modes.dark. The media query block mirrors the attribute block
+ * so a visitor without JavaScript still follows the operating system.
+ * ========================================================================== */
+html[data-theme="dark"] {
+  color-scheme: dark;
+${darkModeLines.join('\n')}
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) {
+    color-scheme: dark;
+${darkModeLines.map((line) => `  ${line}`).join('\n')}
+  }
+}
+
+/* ==========================================================================
+ * 10. TYPOGRAPHY UTILITY CLASSES
  * ========================================================================== */
 ${typographyUtilityClasses.join('\n\n')}
 `;
@@ -248,4 +330,3 @@ if (require.main === module) {
 }
 
 module.exports = { convertTokensToCss };
-
