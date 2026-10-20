@@ -156,8 +156,8 @@ export default function SpotterHome() {
           )}
         </section>
 
-        {/* Built For Member Independence Section */}
-        <section className={styles.featuresSection} aria-label="Built For Member Independence">
+        {/* Card Section */}
+        <section className={styles.cardSection} aria-label="Card Section">
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Built For Member Independence</h2>
             <p className={styles.sectionSubtitle}>

@@ -133,7 +133,7 @@
  * -------------------------------------------------------------------------- */
 .heroSection {
   padding-top: var(--space-12);
-  padding-bottom: var(--space-10);
+  padding-bottom: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -286,8 +286,9 @@
 /* --------------------------------------------------------------------------
  * Section: "Built For Member Independence" & 5 Feature Cards Grid
  * -------------------------------------------------------------------------- */
+.cardSection,
 .featuresSection {
-  padding-top: var(--space-6);
+  margin-top: 6rem;
   padding-bottom: var(--space-12);
   display: flex;
   flex-direction: column;
