@@ -187,6 +187,16 @@ export default function SpotterHome() {
             ))}
           </div>
         </section>
+
+        {/* Info Section */}
+        <section className={styles.infoSection} aria-label="Privacy and Member Records Notice">
+          <div className={styles.infoCard}>
+            <p className={styles.infoText}>
+              <strong className={styles.infoHighlight}>Private by design.</strong>{' '}
+              Your records are accessed only by your session member ID. Never embedded, never searched across other members, and no push notifications or marketing spam.
+            </p>
+          </div>
+        </section>
       </div>
     </div>
   );
