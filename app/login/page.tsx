@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ThemeToggle from '../theme-toggle';
 import styles from '../auth.module.css';
+import StripedBackground from '../striped-background';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -52,6 +53,7 @@ export default function LoginPage() {
 
   return (
     <div className={styles.authPageRoot}>
+      <StripedBackground variant="subtle" />
       <div className={styles.authContainer}>
         {/* Top bar */}
         <div className={styles.authTopBar}>

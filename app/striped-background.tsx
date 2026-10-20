@@ -1,9 +1,18 @@
 import React from 'react';
 import styles from './striped-background.module.css';
 
-export default function StripedBackground() {
+interface StripedBackgroundProps {
+  variant?: 'default' | 'subtle';
+}
+
+export default function StripedBackground({ variant = 'default' }: StripedBackgroundProps) {
+  const isSubtle = variant === 'subtle';
+
   return (
-    <div className={styles.backgroundWrapper} aria-hidden="true">
+    <div
+      className={`${styles.backgroundWrapper} ${isSubtle ? styles.subtleVariant : ''}`}
+      aria-hidden="true"
+    >
       {/* Ambient glowing radial lights */}
       <div className={styles.ambientGlowLayer} />
 

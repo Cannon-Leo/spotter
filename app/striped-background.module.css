@@ -288,3 +288,38 @@
     transform: none !important;
   }
 }
+
+
+/* --------------------------------------------------------------------------
+ * Subtle Variant (for auth/login pages to remain discreet and non-intrusive)
+ * -------------------------------------------------------------------------- */
+.subtleVariant {
+  opacity: 0.38;
+}
+
+.subtleVariant .ambientGlowLayer {
+  opacity: 0.35;
+  filter: blur(20px);
+}
+
+.subtleVariant .stripedCanvas {
+  opacity: 0.32;
+  background-size: 160px 160px;
+}
+
+.subtleVariant .ribbonCluster {
+  opacity: 0.28;
+  filter: blur(4px);
+}
+
+.subtleVariant .svgLayer {
+  opacity: 0.18;
+}
+
+:global([data-theme='dark']) .subtleVariant {
+  opacity: 0.42;
+}
+
+:global([data-theme='dark']) .subtleVariant .ribbonCluster {
+  opacity: 0.32;
+}
