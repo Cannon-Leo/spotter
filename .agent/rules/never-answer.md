@@ -1,9 +1,7 @@
 ---
 description: Governs the fixed 5 refusal categories and front desk handoff in the question router.
-trigger: model_decision
-globs:
-  - "src/server/router/**"
-  - "app/api/ask/**"
+trigger: glob
+globs: "src/server/router/**, app/api/ask/**"
 ---
 
 # Never Answer List

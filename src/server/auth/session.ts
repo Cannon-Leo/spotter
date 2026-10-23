@@ -5,6 +5,9 @@ export const MEMBER_SESSION_COOKIE = 'spotter_member_session';
 
 export interface MemberSessionData {
   memberId: string;
+  memberNumber?: string;
+  name?: string;
+  email?: string;
   effectiveTier: 'Basic' | 'Premium';
   deviceId: string;
   createdAt: number;

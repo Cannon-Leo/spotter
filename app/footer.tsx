@@ -50,22 +50,22 @@ export default function Footer({ onSelectView }: FooterProps) {
             <h3 className={styles.colTitle}>Member Access</h3>
             <ul className={styles.linkList}>
               <li>
-                <Link href="/login" className={styles.footerLink}>
+                <Link href="/auth?view=login" className={styles.footerLink}>
                   Log In
                 </Link>
               </li>
               <li>
-                <Link href="/create-account" className={styles.footerLink}>
+                <Link href="/auth?view=create-account" className={styles.footerLink}>
                   Get Started / Activate
                 </Link>
               </li>
               <li>
-                <Link href="/reset-password" className={styles.footerLink}>
+                <Link href="/auth?view=reset-password" className={styles.footerLink}>
                   Reset Password / PIN
                 </Link>
               </li>
               <li>
-                <Link href="/login?redirect=check-in" className={styles.footerLink}>
+                <Link href="/auth?view=login&redirect=check-in" className={styles.footerLink}>
                   Daily Check-In
                 </Link>
               </li>

@@ -1,11 +1,7 @@
 ---
 description: Governs session management, device binding, PIN hashing, access logging, and check-in auth.
-trigger: model_decision
-globs:
-  - "src/server/auth/**"
-  - "src/server/private/**"
-  - "app/api/auth/**"
-  - "app/api/check-in/**"
+trigger: glob
+globs: "src/server/auth/**, src/server/private/**, app/api/auth/**, app/api/check-in/**"
 ---
 
 # Auth and Sessions

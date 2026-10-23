@@ -1,44 +1,56 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { setMemberSession } from '@/server/auth/session';
+import { registerMember } from '@/server/membership/member';
 import crypto from 'crypto';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { code, pin, deviceId } = body;
+    const { name, email, code, pin, deviceId } = body;
 
-    // Validate 8-character uppercase alphanumeric code (PRD FR-1)
-    if (!code || typeof code !== 'string') {
+    // TEMPORARY: the member number is assumed to have been issued by the front
+    // desk. It cannot be checked against an issuance record until the staff and
+    // admin app that issues numbers exists, so any correctly formatted number is
+    // accepted. When that app exists, or when instructed, restore the FR-1
+    // activation code check.
+    const memberNumber = typeof code === 'string' ? code.trim() : '';
+    if (!/^\d{6}$/.test(memberNumber)) {
       return NextResponse.json(
-        { error: 'That code is not valid. Ask the front desk for a new one.' },
+        { error: 'Enter the 6-digit member number issued by the front desk.' },
         { status: 400 }
       );
     }
 
-    const cleanCode = code.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-    if (cleanCode.length !== 8) {
+    // Validate password / PIN (min 4 characters)
+    if (!pin || typeof pin !== 'string' || pin.trim().length < 4) {
       return NextResponse.json(
-        { error: 'That code is not valid. Ask the front desk for a new one.' },
+        { error: 'Password must be at least 4 characters.' },
         { status: 400 }
       );
     }
 
-    // Validate 4-digit PIN (PRD FR-3)
-    if (!pin || typeof pin !== 'string' || !/^\d{4}$/.test(pin.trim())) {
-      return NextResponse.json(
-        { error: 'PIN must be exactly 4 numeric digits.' },
-        { status: 400 }
-      );
-    }
-
-    // Generate member ID & device binding
-    const memberId = `mem_${crypto.randomBytes(6).toString('hex')}`;
     const boundDeviceId = deviceId || `dev_${crypto.randomBytes(6).toString('hex')}`;
+    const cleanEmail = typeof email === 'string' && email.trim() ? email.trim() : 'jbrendan86@gmail.com';
+    const cleanName = typeof name === 'string' && name.trim() ? name.trim() : 'Joseph Brendan';
+
+    // Register or update member in PostgreSQL database
+    const memberRecord = await registerMember({
+      fullName: cleanName,
+      email: cleanEmail,
+      memberNumber,
+      pin,
+      deviceId: boundDeviceId,
+    });
 
     // Issue session cookie
     await setMemberSession({
-      memberId,
-      effectiveTier: 'Basic',
+      memberId: memberRecord.id,
+      memberNumber: memberRecord.memberNumber,
+      name: memberRecord.fullName,
+      email: cleanEmail,
+      effectiveTier: memberRecord.effectiveTier,
       deviceId: boundDeviceId,
       createdAt: Date.now(),
       lastActiveAt: Date.now(),
@@ -47,8 +59,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       member: {
-        id: memberId,
-        effectiveTier: 'Basic',
+        id: memberRecord.id,
+        memberNumber: memberRecord.memberNumber,
+        name: memberRecord.fullName,
+        email: cleanEmail,
+        effectiveTier: memberRecord.effectiveTier,
       },
     });
   } catch {

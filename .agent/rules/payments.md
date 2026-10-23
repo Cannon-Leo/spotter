@@ -1,10 +1,7 @@
 ---
 description: Governs payment verification, idempotency, atomic settlement, immutable ledger, and nightly sweep.
-trigger: model_decision
-globs:
-  - "src/server/payments/**"
-  - "app/api/webhooks/payment/**"
-  - "app/api/pay/**"
+trigger: glob
+globs: "src/server/payments/**, app/api/webhooks/payment/**, app/api/pay/**"
 ---
 
 # Payments

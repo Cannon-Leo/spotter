@@ -1,9 +1,7 @@
 ---
 description: Enforces derived membership status (active, in grace, expired, cancelled) and effective tier calculations.
-trigger: model_decision
-globs:
-  - "src/server/membership/**"
-  - "src/server/auth/**"
+trigger: glob
+globs: "src/server/membership/**, src/server/auth/**"
 ---
 
 # Membership Status

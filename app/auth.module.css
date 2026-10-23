@@ -28,6 +28,11 @@
   z-index: 1;
 }
 
+/* The PIN reset view carries more guidance copy, so it gets a wider card. */
+.authContainerWide {
+  max-width: 480px;
+}
+
 /* Top bar: Back to Spotter + Official Member App */
 .authTopBar {
   display: flex;
@@ -180,6 +185,46 @@
   border-color: var(--color-secondary);
 }
 
+.formInput.inputInvalid,
+.passwordInput.inputInvalid,
+.formInput.inputInvalid:focus,
+.passwordInput.inputInvalid:focus {
+  border-color: var(--color-error);
+}
+
+.fieldError {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--typography-body-small-font-family);
+  font-size: var(--typography-body-small-font-size);
+  color: var(--color-error);
+}
+
+.fieldErrorIcon {
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+}
+
+.fieldHint {
+  font-family: var(--typography-body-small-font-family);
+  font-size: var(--typography-body-small-font-size);
+  color: var(--color-on-surface-variant);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Password wrapper with Show / Hide button */
 .passwordWrapper {
   display: flex;
@@ -273,6 +318,12 @@
 }
 
 .submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.submitBtn.submitBtnDisabled,
+.submitBtn.submitBtnDisabled:hover {
   opacity: 0.5;
   cursor: not-allowed;
 }

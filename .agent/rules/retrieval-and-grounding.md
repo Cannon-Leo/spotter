@@ -1,9 +1,7 @@
 ---
 description: Governs approved card search, tier filtering in SQL WHERE, raw SQL vector operations, and digit grounding checks.
-trigger: model_decision
-globs:
-  - "src/server/retrieval/**"
-  - "app/api/ask/**"
+trigger: glob
+globs: "src/server/retrieval/**, app/api/ask/**"
 ---
 
 # Retrieval and Grounding

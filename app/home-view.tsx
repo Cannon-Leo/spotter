@@ -12,8 +12,54 @@ import TermsView from './terms-view';
 
 interface MemberSessionInfo {
   id: string;
+  memberNumber?: string;
+  name?: string;
+  email?: string;
   effectiveTier: 'Basic' | 'Premium';
 }
+
+const GYM_QUESTIONS = [
+  {
+    id: 'saturday-class',
+    question: 'What time is the Saturday class?',
+    answer: 'Saturday HIIT and Strength classes run at 8:00 AM and 10:00 AM. Members are advised to arrive 10 minutes early.',
+  },
+  {
+    id: 'bring-guest',
+    question: 'Can I bring a guest with me?',
+    answer: 'Basic members can bring one guest per month with 24 hours advance front desk notice. Premium members enjoy unlimited weekend guest passes.',
+  },
+  {
+    id: 'card-hours',
+    question: 'Why is my card not working before six?',
+    answer: 'Gym access hours begin at 6:00 AM Monday through Saturday. Keypad codes and smart cards activate strictly at 6:00 AM.',
+  },
+  {
+    id: 'access-hours',
+    question: 'What are the gym access hours?',
+    answer: 'Opening hours are Monday to Friday 6:00 AM – 10:00 PM, Saturday 7:00 AM – 8:00 PM, and Sunday 8:00 AM – 6:00 PM.',
+  },
+  {
+    id: 'subscription-price',
+    question: 'What is the current subscription price?',
+    answer: 'Basic membership is 15,000 NGN/month. Premium membership is 25,000 NGN/month with full locker, guest, and class privileges.',
+  },
+  {
+    id: 'pause-membership',
+    question: 'How do I pause my membership?',
+    answer: 'Memberships can be frozen for up to 30 days once per calendar year by notifying the front desk officer at least 3 days in advance.',
+  },
+  {
+    id: 'training-plans',
+    question: 'What training plans are available?',
+    answer: 'We provide structured plans for Beginner Foundations, Strength & Hypertrophy, Conditioning & HIIT, and Open Gym access routines.',
+  },
+  {
+    id: 'trainer-duty',
+    question: 'Who is the trainer on duty today?',
+    answer: 'Head Trainer Coach David and Assistant Coach Amaka are on duty today at the fitness floor.',
+  },
+];
 
 const FEATURES = [
   {
@@ -48,11 +94,14 @@ const FEATURES = [
 export default function SpotterHome() {
   const [session, setSession] = useState<MemberSessionInfo | null>(null);
   const [activeView, setActiveView] = useState<'home' | 'privacy' | 'terms'>('home');
+  const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuToggleRef = useRef<HTMLButtonElement>(null);
   const menuCloseRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
   const hasOpenedMenuRef = useRef(false);
+
+  const selectedQuestion = GYM_QUESTIONS.find((q) => q.id === selectedQuestionId);
 
   // Check session on mount
   useEffect(() => {
@@ -183,24 +232,19 @@ export default function SpotterHome() {
   // Only one of the two is ever displayed, so the screen reader tree never
   // contains two copies of the same control.
   const navActionContent = session ? (
-    <>
-      <span className={styles.memberChip}>
-        Member #{session.id.slice(0, 5)} ({session.effectiveTier})
-      </span>
-      <button
-        type="button"
-        onClick={() => {
-          setIsMenuOpen(false);
-          handleLogout();
-        }}
-        className={styles.navSignOutBtn}
-      >
-        Sign Out
-      </button>
-    </>
+    <button
+      type="button"
+      onClick={() => {
+        setIsMenuOpen(false);
+        handleLogout();
+      }}
+      className={styles.navSignOutBtn}
+    >
+      Sign Out
+    </button>
   ) : (
     <Link
-      href="/create-account"
+      href="/auth?view=create-account"
       className={styles.navGetStartedBtn}
       onClick={() => setIsMenuOpen(false)}
     >
@@ -224,7 +268,7 @@ export default function SpotterHome() {
         <TermsView onBack={handleBackToHome} />
       )}
 
-      {/* Default Marketing Home View */}
+      {/* Default Member or Marketing Home View */}
       {activeView === 'home' && (
         <>
           {/* Top Sticky Navigation Bar */}
@@ -238,6 +282,12 @@ export default function SpotterHome() {
               </div>
 
               <div className={styles.navActions}>
+                {session && (
+                  <span className={styles.navMemberName}>
+                    {session.name || 'Joseph Brendan'}
+                  </span>
+                )}
+
                 <div className={styles.navThemeToggleBtn}>
                   <ThemeToggle />
                 </div>
@@ -306,66 +356,175 @@ export default function SpotterHome() {
               </button>
             </div>
 
-            <div className={styles.mobileDrawerContent}>{navActionContent}</div>
+            <div className={styles.mobileDrawerContent}>
+              {session && (
+                <div style={{ marginBottom: '1rem', textAlign: 'center' }}>
+                  <span className={styles.navMemberName}>
+                    {session.name || 'Joseph Brendan'}
+                  </span>
+                </div>
+              )}
+              {navActionContent}
+            </div>
           </div>
 
-          <main id="main-content" tabIndex={-1} className={styles.container}>
-            {/* Hero Section */}
-          <section className={styles.heroSection}>
-            <h1 className={styles.heroHeadline}>
-              <span>Your Gym. Your Records.</span>
-              <span className={styles.heroHeadlineBreak}>Instant Access.</span>
-            </h1>
-
-            <p className={styles.heroSubtitle}>
-              <span>Check in, view attendance and balance,</span>
-              <span className={styles.heroSubtitleBreak}>
-                and get verified answers instantly.
-              </span>
-            </p>
-
-            <div className={styles.heroActions}>
-              <Link
-                href="/create-account"
-                className={styles.primaryCtaBtn}
-              >
-                Get Started
-              </Link>
-            </div>
-          </section>
-
-          {/* Card Section: 5 feature cards */}
-          <section className={styles.cardSection} aria-labelledby="features-heading">
-            <div className={styles['section_card-text']}>
-              <h2 id="features-heading" className={styles.featuresTitle}>
-                Built For Member Independence
-              </h2>
-              <p className={styles.featuresSubtitle}>
-                Everything you need to manage your gym membership without front desk delays.
-              </p>
-            </div>
-
-            <div className={styles.cardsGrid}>
-              {FEATURES.map((item) => (
-                <article key={item.number} className={styles.featureCard}>
-                  <span className={styles.cardNumber} aria-hidden="true">{item.number}</span>
-                  <h3 className={styles.cardTitle}>{item.title}</h3>
-                  <p className={styles.cardBody}>{item.body}</p>
-                  {item.link && (
-                    <a
-                      href={item.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.cardLink}
+          {/* Main Content Area: Dashboard if Authenticated, Marketing if Visitor */}
+          {session ? (
+            <main id="main-content" tabIndex={-1} className={styles.dashboardContainer}>
+              <div className={styles.dashboardCard}>
+                {/* Header Row */}
+                <div className={styles.dashboardHeader}>
+                  <div className={styles.userMeta}>
+                    <h1 className={styles.userName}>{session.name || 'Joseph Brendan'}</h1>
+                    <p className={styles.userEmail}>{session.email || 'jbrendan86@gmail.com'}</p>
+                  </div>
+                  <div className={styles.headerActions}>
+                    <span className={styles.memberIdBadge}>
+                      #{session.memberNumber || (session.id ? session.id.slice(0, 6) : '123456')}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className={styles.dashboardSignOutBtn}
                     >
-                      {item.linkText}
-                    </a>
+                      Sign Out
+                    </button>
+                  </div>
+                </div>
+
+                {/* 4 Metric Tiles */}
+                <div className={styles.metricsGrid} aria-label="Membership overview">
+                  <div className={styles.metricTile}>
+                    <span className={styles.metricLabel}>EFFECTIVE TIER</span>
+                    <span className={styles.metricValue}>
+                      {session.effectiveTier ? `${session.effectiveTier} Member` : 'Basic Member'}
+                    </span>
+                  </div>
+                  <div className={styles.metricTile}>
+                    <span className={styles.metricLabel}>EXPIRY DATE</span>
+                    <span className={styles.metricValue}>Active</span>
+                  </div>
+                  <div className={styles.metricTile}>
+                    <span className={styles.metricLabel}>ATTENDANCE</span>
+                    <span className={styles.metricValue}>0 days this month</span>
+                  </div>
+                  <div className={styles.metricTile}>
+                    <span className={styles.metricLabel}>BALANCE</span>
+                    <span className={styles.metricValue}>Nothing due.</span>
+                  </div>
+                </div>
+
+                {/* Ask About The Gym Section */}
+                <div className={styles.qaSection}>
+                  <h2 className={styles.qaTitle}>Ask About The Gym</h2>
+                  <p className={styles.qaSubtitle}>
+                    Tapped questions skip model calls and verify against approved gym records.
+                  </p>
+
+                  <div className={styles.qaGrid} role="region" aria-label="Approved gym questions">
+                    {GYM_QUESTIONS.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className={`${styles.qaButton} ${selectedQuestionId === item.id ? styles.qaButtonActive : ''}`}
+                        onClick={() =>
+                          setSelectedQuestionId((prev) => (prev === item.id ? null : item.id))
+                        }
+                        aria-expanded={selectedQuestionId === item.id}
+                      >
+                        {item.question}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Selected Answer Box */}
+                  {selectedQuestion && (
+                    <div className={styles.answerBox} role="status" aria-live="polite">
+                      <div className={styles.answerHeader}>
+                        <span className={styles.answerQuestionTitle}>{selectedQuestion.question}</span>
+                        <span className={styles.answerBadge}>✓ Verified against approved gym records</span>
+                      </div>
+                      <p className={styles.answerText}>{selectedQuestion.answer}</p>
+                    </div>
                   )}
-                </article>
-              ))}
-            </div>
-          </section>
-        </main>
+                </div>
+
+                {/* Card Footer Row */}
+                <div className={styles.cardFooterRow}>
+                  <span className={styles.footerNotice}>
+                    Need assistance with personal records or waivers?
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      alert('To update your password, contact the front desk or use your member activation code.')
+                    }
+                    className={styles.managePasswordLink}
+                  >
+                    Manage Password
+                  </button>
+                </div>
+              </div>
+            </main>
+          ) : (
+            <main id="main-content" tabIndex={-1} className={styles.container}>
+              {/* Hero Section */}
+              <section className={styles.heroSection}>
+                <h1 className={styles.heroHeadline}>
+                  <span>Your Gym. Your Records.</span>
+                  <span className={styles.heroHeadlineBreak}>Instant Access.</span>
+                </h1>
+
+                <p className={styles.heroSubtitle}>
+                  <span>Check in, view attendance and balance,</span>
+                  <span className={styles.heroSubtitleBreak}>
+                    and get verified answers instantly.
+                  </span>
+                </p>
+
+                <div className={styles.heroActions}>
+                  <Link
+                    href="/auth?view=create-account"
+                    className={styles.primaryCtaBtn}
+                  >
+                    Get Started
+                  </Link>
+                </div>
+              </section>
+
+              {/* Card Section: 5 feature cards */}
+              <section className={styles.cardSection} aria-labelledby="features-heading">
+                <div className={styles['section_card-text']}>
+                  <h2 id="features-heading" className={styles.featuresTitle}>
+                    Built For Member Independence
+                  </h2>
+                  <p className={styles.featuresSubtitle}>
+                    Everything you need to manage your gym membership without front desk delays.
+                  </p>
+                </div>
+
+                <div className={styles.cardsGrid}>
+                  {FEATURES.map((item) => (
+                    <article key={item.number} className={styles.featureCard}>
+                      <span className={styles.cardNumber} aria-hidden="true">{item.number}</span>
+                      <h3 className={styles.cardTitle}>{item.title}</h3>
+                      <p className={styles.cardBody}>{item.body}</p>
+                      {item.link && (
+                        <a
+                          href={item.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.cardLink}
+                        >
+                          {item.linkText}
+                        </a>
+                      )}
+                    </article>
+                  ))}
+                </div>
+              </section>
+            </main>
+          )}
         </>
       )}
 

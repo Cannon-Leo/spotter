@@ -1,10 +1,7 @@
 ---
 description: Governs database connection URLs (pooled vs direct), API keys, and inline environment variable reads.
-trigger: model_decision
-globs:
-  - ".env*"
-  - "src/server/db/**"
-  - "prisma/**"
+trigger: glob
+globs: ".env*, src/server/db/**, prisma/**"
 ---
 
 # Environment Variables
