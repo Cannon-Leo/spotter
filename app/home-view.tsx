@@ -394,21 +394,21 @@ export default function SpotterHome() {
 
                 {/* 4 Metric Tiles */}
                 <div className={styles.metricsGrid} aria-label="Membership overview">
-                  <div className={styles.metricTile}>
+                  <div className={`${styles.metricTile} ${styles.metricTileTier}`}>
                     <span className={styles.metricLabel}>EFFECTIVE TIER</span>
                     <span className={styles.metricValue}>
                       {session.effectiveTier ? `${session.effectiveTier} Member` : 'Basic Member'}
                     </span>
                   </div>
-                  <div className={styles.metricTile}>
+                  <div className={`${styles.metricTile} ${styles.metricTileExpiry}`}>
                     <span className={styles.metricLabel}>EXPIRY DATE</span>
                     <span className={styles.metricValue}>Active</span>
                   </div>
-                  <div className={styles.metricTile}>
+                  <div className={`${styles.metricTile} ${styles.metricTileAttendance}`}>
                     <span className={styles.metricLabel}>ATTENDANCE</span>
                     <span className={styles.metricValue}>0 days this month</span>
                   </div>
-                  <div className={styles.metricTile}>
+                  <div className={`${styles.metricTile} ${styles.metricTileBalance}`}>
                     <span className={styles.metricLabel}>BALANCE</span>
                     <span className={styles.metricValue}>Nothing due.</span>
                   </div>
@@ -422,24 +422,31 @@ export default function SpotterHome() {
                   </p>
 
                   <div className={styles.qaGrid} role="region" aria-label="Approved gym questions">
-                    {GYM_QUESTIONS.map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        className={`${styles.qaButton} ${selectedQuestionId === item.id ? styles.qaButtonActive : ''}`}
-                        onClick={() =>
-                          setSelectedQuestionId((prev) => (prev === item.id ? null : item.id))
-                        }
-                        aria-expanded={selectedQuestionId === item.id}
-                      >
-                        {item.question}
-                      </button>
-                    ))}
+                    {GYM_QUESTIONS.map((item, index) => {
+                      const isSelected = selectedQuestionId === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          className={`${styles.qaButton} ${isSelected ? styles.qaButtonActive : ''}`}
+                          onClick={() =>
+                            setSelectedQuestionId((prev) => (prev === item.id ? null : item.id))
+                          }
+                          aria-expanded={isSelected}
+                          aria-controls={isSelected ? 'gym-answer' : undefined}
+                        >
+                          <span className={styles.cardNumber} aria-hidden="true">
+                            {String(index + 1).padStart(2, '0')}
+                          </span>
+                          <span className={styles.cardTitle}>{item.question}</span>
+                        </button>
+                      );
+                    })}
                   </div>
 
                   {/* Selected Answer Box */}
                   {selectedQuestion && (
-                    <div className={styles.answerBox} role="status" aria-live="polite">
+                    <div id="gym-answer" className={styles.answerBox} role="status" aria-live="polite">
                       <div className={styles.answerHeader}>
                         <span className={styles.answerQuestionTitle}>{selectedQuestion.question}</span>
                         <span className={styles.answerBadge}>✓ Verified against approved gym records</span>

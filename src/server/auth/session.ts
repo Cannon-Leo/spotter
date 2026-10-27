@@ -1,110 +1,189 @@
 import { cookies } from 'next/headers';
 import crypto from 'crypto';
+import { prisma } from '../db/client';
 
 export const MEMBER_SESSION_COOKIE = 'spotter_member_session';
 
+/**
+ * What callers are allowed to know about a session. Member identity data
+ * (name, member number, tier) is NOT carried here: it is read from the
+ * member row by the private module using this memberId, so a forged or
+ * stale cookie can never invent a fact.
+ */
 export interface MemberSessionData {
   memberId: string;
-  memberNumber?: string;
-  name?: string;
-  email?: string;
-  effectiveTier: 'Basic' | 'Premium';
   deviceId: string;
   createdAt: number;
   lastActiveAt: number;
 }
 
-const SESSION_SECRET = process.env.SESSION_SECRET || 'spotter-dev-session-secret-key-32chars!';
+const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+const NINETY_DAYS_SECONDS = 90 * 24 * 60 * 60;
+const TOKEN_BYTES = 32;
 
 /**
- * Sign session data with HMAC-SHA256
+ * FR-6: the signing key is required. A missing key must fail loudly instead
+ * of falling back to a value that is published in this repository.
  */
+function getSessionSecret(): string {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret || secret.trim().length < 32) {
+    throw new Error(
+      'SESSION_SECRET is missing or shorter than 32 characters. Refusing to sign member sessions.'
+    );
+  }
+  return secret.trim();
+}
+
 function signPayload(payload: string): string {
-  const hmac = crypto.createHmac('sha256', SESSION_SECRET);
+  const hmac = crypto.createHmac('sha256', getSessionSecret());
   hmac.update(payload);
   return hmac.digest('base64url');
 }
 
-/**
- * Encodes and signs session data into a cookie token string
- */
-export function serializeSession(data: MemberSessionData): string {
-  const json = JSON.stringify(data);
-  const payload = Buffer.from(json).toString('base64url');
-  const signature = signPayload(payload);
-  return `${payload}.${signature}`;
+/** Cookie value is the signed opaque session token. No member data is stored client side. */
+function serializeToken(token: string): string {
+  const payload = Buffer.from(token, 'utf8').toString('base64url');
+  return `${payload}.${signPayload(payload)}`;
 }
 
-/**
- * Decodes and verifies a signed session token
- */
-export function deserializeSession(token: string): MemberSessionData | null {
+function deserializeToken(value: string): string | null {
   try {
-    const parts = token.split('.');
+    const parts = value.split('.');
     if (parts.length !== 2) return null;
 
     const [payload, signature] = parts;
-    const expectedSig = signPayload(payload);
+    const expected = signPayload(payload);
+    const given = Buffer.from(signature, 'utf8');
+    const expectedBuffer = Buffer.from(expected, 'utf8');
 
-    // Constant-time comparison to prevent timing attacks
-    if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSig))) {
-      return null;
-    }
+    if (given.length !== expectedBuffer.length) return null;
+    if (!crypto.timingSafeEqual(given, expectedBuffer)) return null;
 
-    const json = Buffer.from(payload, 'base64url').toString('utf8');
-    const data = JSON.parse(json) as MemberSessionData;
-
-    // Check 90 days expiration (PRD FR-6)
-    const ninetyDaysMs = 90 * 24 * 60 * 60 * 1000;
-    if (Date.now() - data.lastActiveAt > ninetyDaysMs) {
-      return null;
-    }
-
-    return data;
+    return Buffer.from(payload, 'base64url').toString('utf8');
   } catch {
     return null;
   }
 }
 
-/**
- * Reads and verifies member session cookie.
- * INVARIANT: This is the ONLY place the member session cookie is read in the application.
- */
-export async function getMemberSession(): Promise<MemberSessionData | null> {
-  const cookieStore = cookies();
-  const sessionCookie = cookieStore.get(MEMBER_SESSION_COOKIE);
-
-  if (!sessionCookie || !sessionCookie.value) {
-    return null;
-  }
-
-  return deserializeSession(sessionCookie.value);
+/** Only the hash of a session token is ever stored (see MemberSession.tokenHash). */
+function hashToken(token: string): string {
+  return crypto.createHash('sha256').update(token).digest('hex');
 }
 
-/**
- * Sets the member session cookie (HTTP-only, secure in production, SameSite Strict).
- */
-export async function setMemberSession(data: MemberSessionData): Promise<void> {
-  const cookieStore = cookies();
-  const token = serializeSession(data);
+function readSessionCookieValue(): string | null {
+  const store = cookies();
+  const cookie = store.get(MEMBER_SESSION_COOKIE);
+  return cookie?.value || null;
+}
 
-  // 90 days max age per PRD FR-6
-  const ninetyDaysSeconds = 90 * 24 * 60 * 60;
-
-  cookieStore.set(MEMBER_SESSION_COOKIE, token, {
+function writeSessionCookie(token: string): void {
+  cookies().set(MEMBER_SESSION_COOKIE, serializeToken(token), {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    sameSite: 'strict',
     path: '/',
-    maxAge: ninetyDaysSeconds,
+    maxAge: NINETY_DAYS_SECONDS,
   });
 }
 
 /**
- * Clears the member session cookie.
+ * FR-4: creates the session row and binds it to one device. Any session the
+ * member already holds is revoked first, so a member never holds two active
+ * sessions.
  */
-export async function clearMemberSession(): Promise<void> {
-  const cookieStore = cookies();
-  cookieStore.delete(MEMBER_SESSION_COOKIE);
+export async function setMemberSession(params: {
+  memberId: string;
+  deviceId: string;
+}): Promise<void> {
+  const now = new Date();
+
+  await prisma.memberSession.updateMany({
+    where: { memberId: params.memberId, revokedAt: null },
+    data: { revokedAt: now },
+  });
+
+  const token = crypto.randomBytes(TOKEN_BYTES).toString('base64url');
+
+  await prisma.memberSession.create({
+    data: {
+      memberId: params.memberId,
+      tokenHash: hashToken(token),
+      deviceId: params.deviceId,
+      lastSeenAt: now,
+    },
+  });
+
+  await prisma.member.update({
+    where: { id: params.memberId },
+    data: { deviceId: params.deviceId },
+  });
+
+  writeSessionCookie(token);
 }
 
+/**
+ * Reads and verifies the member session cookie.
+ * INVARIANT (FR-15): this is the ONLY place the member session cookie is read.
+ *
+ * FR-4: the session must exist in the database and not be revoked.
+ * FR-6: the session dies ninety days after last use, and requires the PIN
+ * again after seven days without a request.
+ */
+export async function getMemberSession(): Promise<MemberSessionData | null> {
+  const cookieValue = readSessionCookieValue();
+  if (!cookieValue) return null;
+
+  const token = deserializeToken(cookieValue);
+  if (!token) return null;
+
+  const row = await prisma.memberSession.findUnique({
+    where: { tokenHash: hashToken(token) },
+  });
+
+  if (!row || row.revokedAt) return null;
+
+  const now = Date.now();
+  const lastSeen = row.lastSeenAt.getTime();
+
+  if (now - lastSeen > NINETY_DAYS_MS) return null;
+  if (now - lastSeen > SEVEN_DAYS_MS) return null;
+
+  await prisma.memberSession.update({
+    where: { id: row.id },
+    data: { lastSeenAt: new Date(now) },
+  });
+
+  // Refresh the cookie lifetime so the ninety days count from last use.
+  try {
+    writeSessionCookie(token);
+  } catch {
+    // cookies() is read only outside a route handler or server action; the
+    // database row above is still refreshed, which is what enforces FR-6.
+  }
+
+  return {
+    memberId: row.memberId,
+    deviceId: row.deviceId,
+    createdAt: row.createdAt.getTime(),
+    lastActiveAt: now,
+  };
+}
+
+/** Revokes the session in the database and clears the cookie. */
+export async function clearMemberSession(): Promise<void> {
+  const cookieValue = readSessionCookieValue();
+
+  if (cookieValue) {
+    const token = deserializeToken(cookieValue);
+    if (token) {
+      await prisma.memberSession.updateMany({
+        where: { tokenHash: hashToken(token), revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+    }
+  }
+
+  cookies().delete(MEMBER_SESSION_COOKIE);
+}

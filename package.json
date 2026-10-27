@@ -8,16 +8,24 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
-    "build-tokens": "node scripts/build-tokens.js"
+    "build-tokens": "node scripts/build-tokens.js",
+    "postinstall": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio",
+    "db:issue-code": "node scripts/issue-activation-code.js"
   },
   "dependencies": {
+    "@node-rs/argon2": "^2.2.2",
     "@prisma/client": "6.19.3",
     "next": "^14.2.15",
+    "nodemailer": "^10.2.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@types/node": "^20.16.10",
+    "@types/nodemailer": "^8.0.2",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
     "eslint": "^8.57.1",

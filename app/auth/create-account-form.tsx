@@ -4,6 +4,7 @@ import React, { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from '../auth.module.css';
+import { getOrCreateDeviceId } from './view';
 
 function CautionIcon() {
   return (
@@ -26,7 +27,8 @@ function CautionIcon() {
 }
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const MEMBER_NUMBER_PATTERN = /^\d{6}$/;
+const ACTIVATION_CODE_PATTERN = /^[A-Z0-9]{8}$/;
+const PIN_PATTERN = /^\d{4}$/;
 
 function validateEmail(value: string): string {
   const trimmed = value.trim();
@@ -35,24 +37,24 @@ function validateEmail(value: string): string {
   return '';
 }
 
-function validateMemberNumber(value: string): string {
+function validateActivationCode(value: string): string {
   const trimmed = value.trim();
   if (!trimmed) return 'This field must not be empty';
-  if (!MEMBER_NUMBER_PATTERN.test(trimmed)) return 'Member number must be exactly 6 digits';
+  if (!ACTIVATION_CODE_PATTERN.test(trimmed)) {
+    return 'Activation codes are exactly 8 letters or digits';
+  }
   return '';
 }
 
-function validateFullName(value: string): string {
+function validatePin(value: string): string {
   const trimmed = value.trim();
   if (!trimmed) return 'This field must not be empty';
-  if (trimmed.length < 2) return 'Full name must be at least 2 characters';
-  if (trimmed.split(/\s+/).length < 2) return 'Enter at least two names separated by a space';
+  if (!PIN_PATTERN.test(trimmed)) return 'Your PIN must be exactly four digits';
   return '';
 }
 
 export default function CreateAccountForm() {
   const router = useRouter();
-  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [pin, setPin] = useState('');
@@ -62,45 +64,40 @@ export default function CreateAccountForm() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [touched, setTouched] = useState({
-    fullName: false,
     email: false,
     code: false,
     pin: false,
   });
 
-  const fullNameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const codeRef = useRef<HTMLInputElement>(null);
   const pinRef = useRef<HTMLInputElement>(null);
   const termsRef = useRef<HTMLInputElement>(null);
 
-  const fullNameError = touched.fullName ? validateFullName(fullName) : '';
   const emailStarted = touched.email || email.trim().length > 0;
   const emailError = emailStarted ? validateEmail(email) : '';
-  const codeError = touched.code ? validateMemberNumber(code) : '';
+  const codeError = touched.code ? validateActivationCode(code) : '';
   const pinTrimmed = pin.trim();
   const pinError = touched.pin
     ? !pinTrimmed
       ? 'This field must not be empty'
-      : pinTrimmed.length < 4
-        ? 'Password must be at least 4 characters'
+      : !PIN_PATTERN.test(pinTrimmed)
+        ? 'Your PIN must be exactly four digits'
         : ''
     : '';
   const pinHintVisible = pin.length > 0 && !pinError;
   const pinDescribedBy = pinError ? 'accountPinError' : 'accountPinHint';
   const termsInvalid = termsWarning && !acceptedPrivacy;
   const isFormValid =
-    !validateFullName(fullName) &&
     !validateEmail(email) &&
-    !validateMemberNumber(code) &&
-    pinTrimmed.length >= 4 &&
+    !validateActivationCode(code) &&
+    PIN_PATTERN.test(pinTrimmed) &&
     acceptedPrivacy;
 
   const unmetRequirements: string[] = [];
-  if (validateFullName(fullName)) unmetRequirements.push('a full name with at least two names');
   if (validateEmail(email)) unmetRequirements.push('a valid email address');
-  if (validateMemberNumber(code)) unmetRequirements.push('a 6-digit member number');
-  if (pinTrimmed.length < 4) unmetRequirements.push('a password of at least 4 characters');
+  if (validateActivationCode(code)) unmetRequirements.push('the 8 character activation code');
+  if (!PIN_PATTERN.test(pinTrimmed)) unmetRequirements.push('a 4 digit PIN');
   if (!acceptedPrivacy) unmetRequirements.push('acceptance of the terms and conditions');
 
   function markTouched(field: keyof typeof touched) {
@@ -111,19 +108,17 @@ export default function CreateAccountForm() {
     e.preventDefault();
     setError('');
 
-    let invalidField: 'fullName' | 'email' | 'code' | 'pin' | 'terms' | null = null;
-    if (validateFullName(fullName)) invalidField = 'fullName';
-    else if (validateEmail(email)) invalidField = 'email';
-    else if (validateMemberNumber(code)) invalidField = 'code';
-    else if (pinTrimmed.length < 4) invalidField = 'pin';
+    let invalidField: 'email' | 'code' | 'pin' | 'terms' | null = null;
+    if (validateEmail(email)) invalidField = 'email';
+    else if (validateActivationCode(code)) invalidField = 'code';
+    else if (!PIN_PATTERN.test(pinTrimmed)) invalidField = 'pin';
     else if (!acceptedPrivacy) invalidField = 'terms';
 
     if (invalidField) {
-      setTouched({ fullName: true, email: true, code: true, pin: true });
+      setTouched({ email: true, code: true, pin: true });
       if (invalidField === 'terms') setTermsWarning(true);
 
       const fieldRefs: Record<string, React.RefObject<HTMLInputElement>> = {
-        fullName: fullNameRef,
         email: emailRef,
         code: codeRef,
         pin: pinRef,
@@ -139,10 +134,11 @@ export default function CreateAccountForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: fullName.trim(),
+          code: code.trim().toUpperCase(),
           email: email.trim(),
-          code: code.trim(),
-          pin: pin.trim(),
+          pin: pinTrimmed,
+          privacyAccepted: acceptedPrivacy,
+          deviceId: getOrCreateDeviceId(),
         }),
       });
 
@@ -150,7 +146,7 @@ export default function CreateAccountForm() {
       if (!res.ok) {
         setError(
           data.error ||
-            'That member number could not be accepted. Ask the front desk to confirm it.'
+            'That code is not valid. Ask the front desk for a new one.'
         );
       } else {
         router.push('/');
@@ -171,9 +167,9 @@ export default function CreateAccountForm() {
         </div>
 
         <div className={styles.cardHeader}>
-          <h1 className={styles.cardTitle}>Create Member Account</h1>
+          <h1 className={styles.cardTitle}>Activate Member Account</h1>
           <p className={styles.cardSubtitle}>
-            Enter the 6-digit member number issued by the front desk.
+            Enter the 8-character activation code issued by the front desk.
           </p>
         </div>
 
@@ -187,30 +183,34 @@ export default function CreateAccountForm() {
 
         <form onSubmit={handleActivate} className={styles.form} noValidate>
           <div className={styles.formGroup}>
-            <label htmlFor="accountFullName" className={styles.formLabel}>
-              Full Name
+            <label htmlFor="activationCode" className={styles.formLabel}>
+              Activation Code
             </label>
             <input
-              id="accountFullName"
-              name="fullName"
+              id="activationCode"
+              name="code"
               type="text"
-              placeholder="Chioma Okonkwo"
-              value={fullName}
+              inputMode="text"
+              maxLength={8}
+              placeholder="e.g. K7QP2M4X"
+              value={code}
               onChange={(e) => {
-                setFullName(e.target.value);
+                setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''));
                 if (error) setError('');
               }}
-              onBlur={() => markTouched('fullName')}
-              ref={fullNameRef}
-              className={`${styles.formInput} ${fullNameError ? styles.inputInvalid : ''}`}
-              autoComplete="name"
+              onBlur={() => markTouched('code')}
+              ref={codeRef}
+              className={`${styles.formInput} ${codeError ? styles.inputInvalid : ''}`}
+              autoComplete="one-time-code"
+              autoCapitalize="characters"
+              spellCheck={false}
               required
-              aria-invalid={Boolean(fullNameError)}
-              aria-describedby={fullNameError ? 'accountFullNameError' : undefined}
+              aria-invalid={Boolean(codeError)}
+              aria-describedby={codeError ? 'activationCodeError' : undefined}
             />
-            {fullNameError && (
-              <span id="accountFullNameError" className={styles.fieldError} role="status">
-                <CautionIcon /> {fullNameError}
+            {codeError && (
+              <span id="activationCodeError" className={styles.fieldError} role="status">
+                <CautionIcon /> {codeError}
               </span>
             )}
           </div>
@@ -245,49 +245,20 @@ export default function CreateAccountForm() {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="activationCode" className={styles.formLabel}>
-              Member Number
-            </label>
-            <input
-              id="activationCode"
-              name="code"
-              type="text"
-              inputMode="numeric"
-              maxLength={6}
-              placeholder="e.g. 123456"
-              value={code}
-              onChange={(e) => {
-                setCode(e.target.value.replace(/\D/g, ''));
-                if (error) setError('');
-              }}
-              onBlur={() => markTouched('code')}
-              ref={codeRef}
-              className={`${styles.formInput} ${codeError ? styles.inputInvalid : ''}`}
-              autoComplete="one-time-code"
-              required
-              aria-invalid={Boolean(codeError)}
-              aria-describedby={codeError ? 'activationCodeError' : undefined}
-            />
-            {codeError && (
-              <span id="activationCodeError" className={styles.fieldError} role="status">
-                <CautionIcon /> {codeError}
-              </span>
-            )}
-          </div>
-
-          <div className={styles.formGroup}>
             <label htmlFor="accountPin" className={styles.formLabel}>
-              Choose a Password
+              Choose a 4-digit PIN
             </label>
             <div className={styles.passwordWrapper}>
               <input
                 id="accountPin"
                 name="pin"
                 type={showPin ? 'text' : 'password'}
-                placeholder="••••••••"
+                inputMode="numeric"
+                maxLength={4}
+                placeholder="••••"
                 value={pin}
                 onChange={(e) => {
-                  setPin(e.target.value);
+                  setPin(e.target.value.replace(/\D/g, '').slice(0, 4));
                   if (error) setError('');
                 }}
                 onBlur={() => markTouched('pin')}
@@ -302,7 +273,7 @@ export default function CreateAccountForm() {
                 type="button"
                 onClick={() => setShowPin(!showPin)}
                 className={styles.showHideBtn}
-                aria-label={showPin ? 'Hide password' : 'Show password'}
+                aria-label={showPin ? 'Hide PIN' : 'Show PIN'}
               >
                 {showPin ? 'Hide' : 'Show'}
               </button>
@@ -311,7 +282,7 @@ export default function CreateAccountForm() {
               id="accountPinHint"
               className={`${styles.fieldHint} ${pinHintVisible ? '' : styles.visuallyHidden}`}
             >
-              Password must be at least 4 characters.
+              Your PIN must be exactly four digits.
             </span>
             {pinError && (
               <span id="accountPinError" className={styles.fieldError} role="status">
@@ -346,7 +317,7 @@ export default function CreateAccountForm() {
 
           <span id="accountSubmitRequirements" className={styles.visuallyHidden}>
             {!isFormValid
-              ? `Complete all fields to enable Create Account. Still needed: ${unmetRequirements.join(', ')}.`
+              ? `Complete all fields to enable Activate Account. Still needed: ${unmetRequirements.join(', ')}.`
               : ''}
           </span>
 
@@ -358,14 +329,14 @@ export default function CreateAccountForm() {
             aria-describedby={!isFormValid ? 'accountSubmitRequirements' : undefined}
             className={`${styles.submitBtn} ${!isFormValid ? styles.submitBtnDisabled : ''}`}
           >
-            {submitting ? 'Creating Account...' : 'Create Account'}
+            {submitting ? 'Activating...' : 'Activate Account'}
           </button>
         </form>
       </div>
 
       {/* Tinted Bottom Bar */}
       <div className={styles.cardFooter}>
-        Already a member?{' '}
+        Already activated?{' '}
         <Link href="/auth?view=login" className={styles.footerLink}>
           Log In
         </Link>

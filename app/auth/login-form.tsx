@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from '../auth.module.css';
+import { getOrCreateDeviceId } from './view';
 
 function CautionIcon() {
   return (
@@ -25,17 +26,23 @@ function CautionIcon() {
   );
 }
 
+const PIN_PATTERN = /^\d{4}$/;
+
 export default function LoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [identifier, setIdentifier] = useState('');
+  const [pin, setPin] = useState('');
+  const [showPin, setShowPin] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [touched, setTouched] = useState({ email: false, password: false });
+  const [touched, setTouched] = useState({ identifier: false, pin: false });
 
-  const emailEmpty = touched.email && !email.trim();
-  const passwordEmpty = touched.password && !password.trim();
+  const identifierRef = useRef<HTMLInputElement>(null);
+  const pinRef = useRef<HTMLInputElement>(null);
+
+  const identifierEmpty = touched.identifier && !identifier.trim();
+  const pinEmpty = touched.pin && !pin.trim();
+  const pinInvalid = touched.pin && Boolean(pin.trim()) && !PIN_PATTERN.test(pin.trim());
 
   function markTouched(field: keyof typeof touched) {
     setTouched((prev) => ({ ...prev, [field]: true }));
@@ -45,15 +52,17 @@ export default function LoginForm() {
     e.preventDefault();
     setError('');
 
-    if (!email.trim()) {
-      setTouched((prev) => ({ ...prev, email: true }));
-      setError('Please enter your email address or member ID.');
+    if (!identifier.trim()) {
+      setTouched((prev) => ({ ...prev, identifier: true }));
+      identifierRef.current?.focus();
+      setError('Please enter your member number or email address.');
       return;
     }
 
-    if (!password.trim()) {
-      setTouched((prev) => ({ ...prev, password: true }));
-      setError('Please enter your password.');
+    if (!PIN_PATTERN.test(pin.trim())) {
+      setTouched((prev) => ({ ...prev, pin: true }));
+      pinRef.current?.focus();
+      setError('Please enter your four digit PIN.');
       return;
     }
 
@@ -62,12 +71,16 @@ export default function LoginForm() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), pin: password.trim() }),
+        body: JSON.stringify({
+          identifier: identifier.trim(),
+          pin: pin.trim(),
+          deviceId: getOrCreateDeviceId(),
+        }),
       });
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || 'Failed to sign in. Please verify your credentials.');
+        setError(data.error || 'Those details do not match our records.');
       } else {
         router.push('/');
         router.refresh();
@@ -103,26 +116,32 @@ export default function LoginForm() {
 
         <form onSubmit={handleLogin} className={styles.form}>
           <div className={styles.formGroup}>
-            <label htmlFor="loginEmail" className={styles.formLabel}>
-              Email Address
+            <label htmlFor="loginIdentifier" className={styles.formLabel}>
+              Member Number or Email
             </label>
             <input
-              id="loginEmail"
-              name="email"
-              type="email"
-              placeholder="chioma@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onBlur={() => markTouched('email')}
-              className={`${styles.formInput} ${emailEmpty ? styles.inputInvalid : ''}`}
-              autoComplete="email"
+              id="loginIdentifier"
+              name="identifier"
+              type="text"
+              placeholder="123456 or chioma@example.com"
+              value={identifier}
+              onChange={(e) => {
+                setIdentifier(e.target.value);
+                if (error) setError('');
+              }}
+              onBlur={() => markTouched('identifier')}
+              ref={identifierRef}
+              className={`${styles.formInput} ${identifierEmpty ? styles.inputInvalid : ''}`}
+              autoComplete="username"
+              autoCapitalize="none"
+              spellCheck={false}
               autoFocus
               required
-              aria-invalid={emailEmpty}
-              aria-describedby={emailEmpty ? 'loginEmailError' : undefined}
+              aria-invalid={identifierEmpty}
+              aria-describedby={identifierEmpty ? 'loginIdentifierError' : undefined}
             />
-            {emailEmpty && (
-              <span id="loginEmailError" className={styles.fieldError} role="alert">
+            {identifierEmpty && (
+              <span id="loginIdentifierError" className={styles.fieldError} role="alert">
                 <CautionIcon /> This field must not be empty
               </span>
             )}
@@ -130,8 +149,8 @@ export default function LoginForm() {
 
           <div className={styles.formGroup}>
             <div className={styles.labelRow}>
-              <label htmlFor="loginPassword" className={styles.formLabel}>
-                Password / PIN
+              <label htmlFor="loginPin" className={styles.formLabel}>
+                4-digit PIN
               </label>
               <a
                 href="https://wa.me/?text=Hello%20Front%20Desk,%20I%20need%20a%20PIN%20reset%20for%20my%20Spotter%20account"
@@ -139,36 +158,41 @@ export default function LoginForm() {
                 rel="noopener noreferrer"
                 className={styles.forgotLink}
               >
-                Forgot password?
+                Forgot PIN?
               </a>
             </div>
             <div className={styles.passwordWrapper}>
               <input
-                id="loginPassword"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
+                id="loginPin"
+                name="pin"
+                type={showPin ? 'text' : 'password'}
+                inputMode="numeric"
+                maxLength={4}
                 placeholder="Enter 4-digit PIN"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onBlur={() => markTouched('password')}
-                className={`${styles.passwordInput} ${passwordEmpty ? styles.inputInvalid : ''}`}
+                value={pin}
+                onChange={(e) => {
+                  setPin(e.target.value.replace(/\D/g, '').slice(0, 4));
+                  if (error) setError('');
+                }}
+                onBlur={() => markTouched('pin')}
+                ref={pinRef}
+                className={`${styles.passwordInput} ${pinEmpty || pinInvalid ? styles.inputInvalid : ''}`}
                 autoComplete="current-password"
-                maxLength={10}
                 required
-                aria-invalid={passwordEmpty}
-                aria-describedby={passwordEmpty ? 'loginPasswordError' : undefined}
+                aria-invalid={pinEmpty || pinInvalid}
+                aria-describedby={pinEmpty ? 'loginPinError' : undefined}
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() => setShowPin(!showPin)}
                 className={styles.showHideBtn}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={showPin ? 'Hide PIN' : 'Show PIN'}
               >
-                {showPassword ? 'Hide' : 'Show'}
+                {showPin ? 'Hide' : 'Show'}
               </button>
             </div>
-            {passwordEmpty && (
-              <span id="loginPasswordError" className={styles.fieldError} role="alert">
+            {pinEmpty && (
+              <span id="loginPinError" className={styles.fieldError} role="alert">
                 <CautionIcon /> This field must not be empty
               </span>
             )}
@@ -188,7 +212,7 @@ export default function LoginForm() {
       <div className={styles.cardFooter}>
         New to Spotter?{' '}
         <Link href="/auth?view=create-account" className={styles.footerLink}>
-          Create an account
+          Activate your account
         </Link>
       </div>
     </div>

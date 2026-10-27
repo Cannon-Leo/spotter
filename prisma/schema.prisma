@@ -94,10 +94,14 @@ model Gym {
   id           String   @id @default(cuid())
   name         String
   timezone     String   @default("Africa/Lagos")
+  phone        String?  // gym contact number shown to members
+  email        String?  // gym contact email, stored lower case
+  address      String?
   graceDays    Int      @default(3)
   opensMinute  Int      @default(360)   // 06:00 local, for FR-19b
   closesMinute Int      @default(1320)  // 22:00 local
   createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
 
   members      Member[]
   staff        Staff[]
@@ -126,10 +130,12 @@ model Staff {
   gym            Gym       @relation(fields: [gymId], references: [id])
   name           String
   role           StaffRole
+  email          String?   // staff sign in identifier, stored lower case
   whatsappNumber String
   passwordHash   String
   active         Boolean   @default(true)
   createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now()) @updatedAt
 
   deskShifts          DeskShift[]
   authoredVersions    CardVersion[] @relation("VersionAuthor")
@@ -143,6 +149,7 @@ model Staff {
   reviewedReports     WrongAnswerReport[]
   handoffs            Handoff[]
 
+  @@unique([gymId, email])
   @@index([gymId, active])
 }
 
@@ -176,13 +183,23 @@ model Member {
   firstName    String
   lastName     String
   phone        String
+  email        String?   // contact only, never a login identifier on its own
+  dateOfBirth  DateTime? @db.Date
+  address      String?
+  emergencyContactName  String?
+  emergencyContactPhone String?
   tier         Tier      @default(BASIC)
+  joinedAt     DateTime  @db.Date @default(now())
   expiryDate   DateTime  @db.Date
   cancelledAt  DateTime?
-  pinHash      String?
-  deviceId     String?
+  pinHash      String?   // Argon2id, see FR-3
+  deviceId     String?   // last bound device, see FR-4
   activatedAt  DateTime?
   privacyAcceptedAt DateTime?
+  // FR-7 wrong PIN lockout. Reset on every successful PIN entry.
+  failedPinAttempts  Int       @default(0)
+  pinFailedWindowStart DateTime?
+  pinLockedUntil     DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
@@ -199,6 +216,7 @@ model Member {
   accessLogs         PrivateAccessLog[]
 
   @@unique([gymId, memberNumber])
+  @@unique([gymId, email])
   @@index([gymId, expiryDate])
 }
 
@@ -231,6 +249,7 @@ model ActivationCode {
   createdAt       DateTime  @default(now())
 
   @@index([memberId, createdAt])
+  @@index([expiresAt])   // nightly sweep: expired codes that were never used
 }
 
 // ---------- shared records ----------
