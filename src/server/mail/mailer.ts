@@ -208,3 +208,247 @@ export async function sendEmail(message: EmailMessage): Promise<SentEmail> {
     throw err;
   }
 }
+
+/* ==========================================================================
+ * Welcome email
+ *
+ * Sent once, immediately after a member activates her account (FR-1 to FR-4).
+ * The caller schedules it after the response is finished, so a slow or broken
+ * SMTP server never delays activation and never turns a successful signup into
+ * an error page.
+ * ========================================================================== */
+
+export interface WelcomeEmailParams {
+  /** The member number she will use to sign in. */
+  memberNumber: string;
+  /** The address to send to. The caller checks it exists before calling. */
+  to: string;
+}
+
+/** Brand values, taken from styles/tokens.css. Inlined: email clients ignore variables. */
+const WELCOME_COLORS = {
+  primary: '#00e3aa',
+  onPrimary: '#002116',
+  background: '#f4f6f5',
+  card: '#ffffff',
+  heading: '#161d1a',
+  body: '#414845',
+  muted: '#58605c',
+  rule: '#e3e8e5',
+  header: '#161d1a',
+  checkmark: '#007a55',
+} as const;
+
+/** Anything the member's name contains must not become markup. */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
+ * The app URL is only used to offer a sign in link. When it is not configured
+ * the email is still complete and useful without one, so a missing value is not
+ * an error.
+ */
+function readAppUrl(): string | null {
+  const raw = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (!raw) return null;
+  return raw.replace(/\/+$/, '');
+}
+
+/**
+ * Builds the welcome message as data. Pure apart from reading the app URL, so
+ * it can be inspected or rendered without touching SMTP.
+ */
+export function buildWelcomeEmail(params: WelcomeEmailParams): EmailMessage {
+  const memberNumber = params.memberNumber.trim();
+  const safeNumber = escapeHtml(memberNumber);
+
+  /*
+   * Deliberately no first name. The desk row exists before the member has ever
+   * chosen a name, so a greeting built from it would call her whatever the
+   * placeholder happens to be. She sets her own name in the app on first sign
+   * in; this message must not guess.
+   */
+  const greeting = 'Welcome to Spotter';
+  const htmlGreeting = greeting;
+
+  const appUrl = readAppUrl();
+  const signInUrl = appUrl ? `${appUrl}/auth?view=login` : null;
+
+  const benefits = [
+    'Ask about the gym and get answers from our approved information.',
+    'Check in with the daily four digit code while you are in the building.',
+    'See your own attendance and membership expiry date.',
+    'Pay your subscription and have your membership extended straight away.',
+    'Ask the front desk for a person whenever you need one.',
+  ];
+
+  const text = [
+    `${greeting}!`,
+    '',
+    'Your Spotter membership is active and your member account is ready.',
+    '',
+    `Member number: ${memberNumber}`,
+    '',
+    'With the Spotter app you can:',
+    ...benefits.map((line) => `  - ${line}`),
+    '',
+    'Keep your four digit PIN private. Spotter will never ask you for it by',
+    'email, phone or WhatsApp. If you think someone else knows it, tell the',
+    'front desk and we will help you change it.',
+    '',
+    ...(signInUrl ? [`Sign in at ${signInUrl}`, ''] : []),
+    'We are glad you are here.',
+    '',
+    'The Spotter Gym team',
+  ].join('\n');
+
+  const benefitRows = benefits
+    .map(
+      (line) => `
+              <tr>
+                <td valign="top" style="padding:0 0 10px 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:22px;color:${WELCOME_COLORS.body};">
+                  <span style="color:${WELCOME_COLORS.checkmark};font-weight:bold;">&#10003;</span>
+                  &nbsp;${escapeHtml(line)}
+                </td>
+              </tr>`
+    )
+    .join('');
+
+  const signInBlock = signInUrl
+    ? `
+              <tr>
+                <td style="padding:4px 32px 28px 32px;">
+                  <a href="${escapeHtml(signInUrl)}"
+                     style="display:inline-block;margin:0;background:${WELCOME_COLORS.primary};color:${WELCOME_COLORS.onPrimary};font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:bold;text-decoration:none;padding:13px 28px;border-radius:999px;">
+                    Sign in to Spotter
+                  </a>
+                </td>
+              </tr>`
+    : '';
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>${escapeHtml(greeting)}</title>
+  </head>
+  <body style="margin:0;padding:0;background:${WELCOME_COLORS.background};">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${WELCOME_COLORS.background};padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:${WELCOME_COLORS.card};border-radius:16px;overflow:hidden;">
+            <!-- Masthead -->
+            <tr>
+              <td style="background:${WELCOME_COLORS.header};padding:26px 32px;">
+                <span style="font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:bold;letter-spacing:3px;color:#ffffff;">
+                  SPOTTER<span style="color:${WELCOME_COLORS.primary};">.</span>
+                </span>
+                <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:${WELCOME_COLORS.primary};padding-top:6px;">
+                  Official member app
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td style="height:4px;background:${WELCOME_COLORS.primary};font-size:0;line-height:0;">&nbsp;</td>
+            </tr>
+            <!-- Body -->
+            <tr>
+              <td style="padding:32px 32px 8px 32px;">
+                <h1 style="margin:0 0 14px 0;font-family:Arial,Helvetica,sans-serif;font-size:25px;line-height:32px;font-weight:bold;color:${WELCOME_COLORS.heading};">
+                  ${htmlGreeting}
+                </h1>
+                <p style="margin:0 0 22px 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:${WELCOME_COLORS.body};">
+                  Your Spotter membership is active and your member account is ready.
+                  Everything you need for the gym now lives in one place.
+                </p>
+              </td>
+            </tr>
+            <!-- Member number -->
+            <tr>
+              <td style="padding:0 32px 24px 32px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e7fff4;border-radius:12px;">
+                  <tr>
+                    <td style="padding:16px 20px;">
+                      <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:${WELCOME_COLORS.muted};padding-bottom:4px;">
+                        Your member number
+                      </div>
+                      <div style="font-family:'Courier New',Courier,monospace;font-size:22px;font-weight:bold;letter-spacing:3px;color:${WELCOME_COLORS.heading};">
+                        ${safeNumber}
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- What you can do -->
+            <tr>
+              <td style="padding:0 32px;">
+                <div style="font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:${WELCOME_COLORS.heading};padding-bottom:12px;">
+                  What you can do
+                </div>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                  ${benefitRows}
+                </table>
+              </td>
+            </tr>
+            <!-- Privacy note -->
+            <tr>
+              <td style="padding:14px 32px 26px 32px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid ${WELCOME_COLORS.rule};">
+                  <tr>
+                    <td style="padding:18px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:21px;color:${WELCOME_COLORS.muted};">
+                      Keep your four digit PIN private. Spotter will never ask you for it by
+                      email, phone or WhatsApp. If you think someone else knows it, tell the
+                      front desk and we will help you change it.
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            ${signInBlock}
+            <!-- Sign off -->
+            <tr>
+              <td style="padding:0 32px 30px 32px;">
+                <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:${WELCOME_COLORS.body};">
+                  We are glad you are here.
+                </p>
+                <p style="margin:6px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;font-weight:bold;color:${WELCOME_COLORS.heading};">
+                  The Spotter Gym team
+                </p>
+              </td>
+            </tr>
+            <!-- Footer -->
+            <tr>
+              <td style="background:${WELCOME_COLORS.background};padding:18px 32px;border-top:1px solid ${WELCOME_COLORS.rule};">
+                <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;color:${WELCOME_COLORS.muted};">
+                  You are receiving this because your Spotter member account was just activated.
+                  This is a one time welcome message, not a newsletter.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+
+  return {
+    to: params.to.trim(),
+    subject: greeting,
+    text,
+    html,
+  };
+}
+
+/** Builds and sends the welcome email. Throws exactly as sendEmail() does. */
+export async function sendWelcomeEmail(params: WelcomeEmailParams): Promise<SentEmail> {
+  return sendEmail(buildWelcomeEmail(params));
+}

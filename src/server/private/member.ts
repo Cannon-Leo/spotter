@@ -1,5 +1,6 @@
 import { prisma } from '../db/client';
 import { MemberRecordDto, toMemberRecord } from '../membership/member';
+import { NAME_CHANGE_WINDOW_MS } from './profile';
 
 /**
  * Reads a member's own profile record.
@@ -18,7 +19,16 @@ export async function getMemberProfile(memberId: string): Promise<MemberRecordDt
 
   const member = await prisma.member.findUnique({
     where: { id: memberId },
-    include: { gym: true },
+    include: {
+      gym: true,
+      // Only the rolling window matters for the limit, so older rows stay out
+      // of the read.
+      nameChanges: {
+        where: { changedAt: { gt: new Date(Date.now() - NAME_CHANGE_WINDOW_MS) } },
+        orderBy: { changedAt: 'asc' },
+        select: { changedAt: true },
+      },
+    },
   });
 
   // Nothing was read, so there is nothing to log. The foreign key on

@@ -34,6 +34,15 @@ export async function GET() {
         effectiveTier: profile.effectiveTier,
         membershipStatus: profile.membershipStatus,
         lastActiveAt: session.lastActiveAt,
+        profileCompleted: profile.profileCompleted,
+        hasAvatar: profile.hasAvatar,
+        // Cache busting: the URL changes whenever a new picture is stored.
+        avatarUrl: profile.hasAvatar
+          ? `/api/profile/avatar?v=${profile.avatarUpdatedAt?.getTime() ?? 0}`
+          : null,
+        nameChangesUsed: profile.nameChangesUsed,
+        nameChangesRemaining: profile.nameChangesRemaining,
+        nameChangeWindowEndsAt: profile.nameChangeWindowEndsAt?.toISOString() ?? null,
       },
     });
   } catch (err) {

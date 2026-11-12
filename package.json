@@ -3,10 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "clean:next": "node -e \"const fs=require('fs'),p='.next';const scan=d=>fs.readdirSync(d,{withFileTypes:true}).some(e=>e.isSymbolicLink()||(e.isDirectory()&&scan(d+'/'+e.name)));if(fs.existsSync(p)&&scan(p)){fs.rmSync(p,{recursive:true,force:true});console.log('Cleared .next: OneDrive cloud placeholders found')}\"",
+    "predev": "npm run clean:next",
+    "dev": "next dev --webpack",
+    "prebuild": "npm run clean:next",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "next lint",
+    "test": "node --test tests/profile-rules.test.mjs",
     "type-check": "tsc --noEmit",
     "build-tokens": "node scripts/build-tokens.js",
     "postinstall": "prisma generate",
@@ -18,7 +22,7 @@
   "dependencies": {
     "@node-rs/argon2": "^2.2.2",
     "@prisma/client": "6.19.3",
-    "next": "^14.2.15",
+    "next": "^16.4.6",
     "nodemailer": "^10.2.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

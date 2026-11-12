@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { setMemberSession } from '@/server/auth/session';
 import { activateMember } from '@/server/membership/member';
+import { sendWelcomeEmail } from '@/server/mail/mailer';
 import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
@@ -41,6 +42,33 @@ export async function POST(req: NextRequest) {
     }
 
     await setMemberSession({ memberId: result.member.id, deviceId: boundDeviceId });
+
+    /*
+     * The welcome email is scheduled with after(), so it runs once the response
+     * has been sent. A slow or misconfigured SMTP server therefore cannot delay
+     * activation, and a failure cannot roll back an account that already exists.
+     * Nothing about the member is logged here: the address and body are her data.
+     */
+    const welcomeTo = result.member.email?.trim();
+    if (welcomeTo) {
+      const welcomeMemberNumber = result.member.memberNumber;
+      after(async () => {
+        try {
+          await sendWelcomeEmail({
+            to: welcomeTo,
+            memberNumber: welcomeMemberNumber,
+          });
+          console.log('[api/auth/activate] welcome email dispatched');
+        } catch (err) {
+          console.error(
+            '[api/auth/activate] welcome email failed (activation unaffected):',
+            err instanceof Error ? err.message : String(err)
+          );
+        }
+      });
+    } else {
+      console.warn('[api/auth/activate] no email address on file, welcome email skipped');
+    }
 
     return NextResponse.json({
       success: true,

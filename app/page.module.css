@@ -1365,3 +1365,440 @@
   }
 }
 
+
+/* --------------------------------------------------------------------------
+ * Self service profile: avatar, inline name edit, first-login modal
+ *
+ * The second Sign Out button in the dashboard header is gone. The picture is
+ * the identity control now: it shows a silhouette until a picture exists and
+ * opens the upload picker when clicked.
+ * -------------------------------------------------------------------------- */
+
+.userNameRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.nameEditBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-full);
+  background-color: transparent;
+  color: var(--color-on-surface-variant);
+  cursor: pointer;
+  transition: background-color var(--motion-duration-fast) var(--motion-ease-standard),
+              border-color var(--motion-duration-fast) var(--motion-ease-standard),
+              color var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.nameEditBtn:hover {
+  background-color: var(--color-surface-container-high);
+  border-color: var(--color-outline-color);
+  color: var(--color-on-background);
+}
+
+.nameEditBtn:focus-visible,
+.avatarButton:focus-visible,
+.profileModalClose:focus-visible,
+.profileAvatarPicker:focus-visible,
+.profilePrimaryBtn:focus-visible,
+.profileSecondaryBtn:focus-visible,
+.nameEditSave:focus-visible,
+.nameEditCancel:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.nameEditForm {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.nameEditInput {
+  min-width: 13rem;
+  max-width: 100%;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--color-outline-color);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-container-high);
+  color: var(--color-on-background);
+  font-family: var(--typography-body-medium-font-family);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.nameEditInput:focus {
+  border-color: var(--color-secondary);
+}
+
+.nameEditSave,
+.nameEditCancel {
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--typography-label-large-font-family);
+  font-size: var(--typography-label-medium-font-size);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--motion-duration-fast) var(--motion-ease-standard),
+              opacity var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.nameEditSave {
+  border: 1px solid var(--color-primary);
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.nameEditCancel {
+  border: 1px solid var(--color-outline-color);
+  background-color: transparent;
+  color: var(--color-on-background);
+}
+
+.nameEditCancel:hover {
+  background-color: var(--color-surface-container-high);
+}
+
+.nameEditSave:disabled,
+.nameEditCancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.nameHint {
+  font-family: var(--typography-body-small-font-family);
+  font-size: var(--typography-body-small-font-size);
+  color: var(--color-on-surface-variant);
+}
+
+.nameError {
+  font-family: var(--typography-body-small-font-family);
+  font-size: var(--typography-body-small-font-size);
+  color: var(--color-error);
+}
+
+.avatarButton {
+  position: relative;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  padding: 0;
+  border: 1px solid var(--color-outline-color);
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-container-high);
+  color: var(--color-on-surface-variant);
+  cursor: pointer;
+  transition: border-color var(--motion-duration-fast) var(--motion-ease-standard),
+              transform var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.avatarButton:hover {
+  border-color: var(--color-primary);
+  color: var(--color-on-background);
+}
+
+.avatarButton:active {
+  transform: scale(0.97);
+}
+
+.avatarImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+}
+
+.avatarFallbackIcon {
+  width: 1.9rem;
+  height: 1.9rem;
+}
+
+.avatarEditBadge {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  border: 2px solid var(--color-surface);
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.hiddenFileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.profileBanner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-error-container);
+  color: var(--color-on-error-container);
+  font-family: var(--typography-body-small-font-family);
+  font-size: var(--typography-body-small-font-size);
+}
+
+.profileBannerClose {
+  padding: 0 0.2rem;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* ---------- first login modal ---------- */
+
+.profileModalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background-color: color-mix(in srgb, var(--color-scrim) 55%, transparent);
+}
+
+.profileModal {
+  position: relative;
+  width: 100%;
+  max-width: 28rem;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  padding: var(--space-6);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
+  box-shadow: 0 24px 60px color-mix(in srgb, var(--color-shadow) 35%, transparent);
+}
+
+.profileModalClose {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  background-color: transparent;
+  color: var(--color-on-surface-variant);
+  cursor: pointer;
+}
+
+.profileModalClose:hover {
+  background-color: var(--color-surface-container-high);
+  color: var(--color-on-background);
+}
+
+.profileModalTitle {
+  margin: 0 0 var(--space-2);
+  padding-right: 2rem;
+  font-family: var(--typography-title-large-font-family);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-on-background);
+}
+
+.profileModalText {
+  margin: 0 0 var(--space-4);
+  font-family: var(--typography-body-small-font-family);
+  font-size: var(--typography-body-small-font-size);
+  line-height: 1.5;
+  color: var(--color-on-surface-variant);
+}
+
+.profileModalForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.profileAvatarPickerWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.profileAvatarPicker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 6rem;
+  height: 6rem;
+  padding: 0;
+  border: 1px dashed var(--color-outline-color);
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-container-high);
+  color: var(--color-on-surface-variant);
+  cursor: pointer;
+  transition: border-color var(--motion-duration-fast) var(--motion-ease-standard),
+              color var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.profileAvatarPicker:hover {
+  border-color: var(--color-primary);
+  color: var(--color-on-background);
+}
+
+.profileAvatarPickerImage {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+}
+
+.profileAvatarPickerIcon {
+  width: 2.6rem;
+  height: 2.6rem;
+}
+
+.profileAvatarPickerBadge {
+  position: absolute;
+  left: 50%;
+  bottom: -0.55rem;
+  transform: translateX(-50%);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  font-family: var(--typography-label-small-font-family);
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.profileAvatarHint {
+  margin-top: var(--space-2);
+  font-family: var(--typography-body-small-font-family);
+  font-size: 11px;
+  color: var(--color-on-surface-variant);
+  text-align: center;
+}
+
+.profileField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.profileFieldLabel {
+  font-family: var(--typography-label-medium-font-family);
+  font-size: var(--typography-label-medium-font-size);
+  font-weight: 600;
+  color: var(--color-on-background);
+}
+
+.profileFieldInput {
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--color-outline-color);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-container-high);
+  color: var(--color-on-background);
+  font-family: var(--typography-body-medium-font-family);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.profileFieldInput:focus {
+  border-color: var(--color-secondary);
+}
+
+.profileModalError {
+  margin: 0;
+  font-family: var(--typography-body-small-font-family);
+  font-size: var(--typography-body-small-font-size);
+  color: var(--color-error);
+}
+
+.profileModalActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.profilePrimaryBtn {
+  flex: 1 1 auto;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  font-family: var(--typography-label-large-font-family);
+  font-size: var(--typography-label-large-font-size);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.profilePrimaryBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.profileSecondaryBtn {
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--color-outline-color);
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  color: var(--color-on-background);
+  font-family: var(--typography-label-large-font-family);
+  font-size: var(--typography-label-large-font-size);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.profileSecondaryBtn:hover {
+  background-color: var(--color-surface-container-high);
+}

@@ -10,7 +10,7 @@ import ResetPasswordView from './reset-password-view';
 import { parseAuthView, type AuthView } from './view';
 
 interface AuthPageProps {
-  searchParams: { view?: string | string[] };
+  searchParams: Promise<{ view?: string | string[] }>;
 }
 
 const VIEW_META: Record<AuthView, { title: string; description: string }> = {
@@ -29,7 +29,8 @@ const VIEW_META: Record<AuthView, { title: string; description: string }> = {
 };
 
 export async function generateMetadata({ searchParams }: AuthPageProps): Promise<Metadata> {
-  const view = parseAuthView(searchParams.view);
+  const params = await searchParams;
+  const view = parseAuthView(params.view);
   return {
     title: VIEW_META[view].title,
     description: VIEW_META[view].description,
@@ -40,8 +41,9 @@ export async function generateMetadata({ searchParams }: AuthPageProps): Promise
   };
 }
 
-export default function AuthPage({ searchParams }: AuthPageProps) {
-  const view = parseAuthView(searchParams.view);
+export default async function AuthPage({ searchParams }: AuthPageProps) {
+  const params = await searchParams;
+  const view = parseAuthView(params.view);
   const isReset = view === 'reset-password';
 
   return (

@@ -4,7 +4,7 @@ import React, { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from '../auth.module.css';
-import { getOrCreateDeviceId } from './view';
+import { formatIdentifierInput, getOrCreateDeviceId } from './view';
 
 function CautionIcon() {
   return (
@@ -72,7 +72,7 @@ export default function LoginForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          identifier: identifier.trim(),
+          identifier: formatIdentifierInput(identifier).trim(),
           pin: pin.trim(),
           deviceId: getOrCreateDeviceId(),
         }),
@@ -126,7 +126,7 @@ export default function LoginForm() {
               placeholder="123456 or chioma@example.com"
               value={identifier}
               onChange={(e) => {
-                setIdentifier(e.target.value);
+                setIdentifier(formatIdentifierInput(e.target.value));
                 if (error) setError('');
               }}
               onBlur={() => markTouched('identifier')}
@@ -134,6 +134,7 @@ export default function LoginForm() {
               className={`${styles.formInput} ${identifierEmpty ? styles.inputInvalid : ''}`}
               autoComplete="username"
               autoCapitalize="none"
+              autoCorrect="off"
               spellCheck={false}
               autoFocus
               required
@@ -212,7 +213,7 @@ export default function LoginForm() {
       <div className={styles.cardFooter}>
         New to Spotter?{' '}
         <Link href="/auth?view=create-account" className={styles.footerLink}>
-          Activate your account
+          Sign up for Spotter
         </Link>
       </div>
     </div>

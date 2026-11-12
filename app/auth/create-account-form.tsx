@@ -4,7 +4,7 @@ import React, { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from '../auth.module.css';
-import { getOrCreateDeviceId } from './view';
+import { formatEmailInput, getOrCreateDeviceId } from './view';
 
 function CautionIcon() {
   return (
@@ -135,7 +135,7 @@ export default function CreateAccountForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           code: code.trim().toUpperCase(),
-          email: email.trim(),
+          email: formatEmailInput(email),
           pin: pinTrimmed,
           privacyAccepted: acceptedPrivacy,
           deviceId: getOrCreateDeviceId(),
@@ -226,13 +226,17 @@ export default function CreateAccountForm() {
               placeholder="chioma@example.com"
               value={email}
               onChange={(e) => {
-                setEmail(e.target.value);
+                setEmail(formatEmailInput(e.target.value));
                 if (error) setError('');
               }}
               onBlur={() => markTouched('email')}
               ref={emailRef}
               className={`${styles.formInput} ${emailError ? styles.inputInvalid : ''}`}
               autoComplete="email"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              inputMode="email"
               required
               aria-invalid={Boolean(emailError)}
               aria-describedby={emailError ? 'accountEmailError' : undefined}

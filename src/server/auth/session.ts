@@ -72,14 +72,15 @@ function hashToken(token: string): string {
   return crypto.createHash('sha256').update(token).digest('hex');
 }
 
-function readSessionCookieValue(): string | null {
-  const store = cookies();
+async function readSessionCookieValue(): Promise<string | null> {
+  const store = await cookies();
   const cookie = store.get(MEMBER_SESSION_COOKIE);
   return cookie?.value || null;
 }
 
-function writeSessionCookie(token: string): void {
-  cookies().set(MEMBER_SESSION_COOKIE, serializeToken(token), {
+async function writeSessionCookie(token: string): Promise<void> {
+  const store = await cookies();
+  store.set(MEMBER_SESSION_COOKIE, serializeToken(token), {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
@@ -120,7 +121,7 @@ export async function setMemberSession(params: {
     data: { deviceId: params.deviceId },
   });
 
-  writeSessionCookie(token);
+  await writeSessionCookie(token);
 }
 
 /**
@@ -132,7 +133,7 @@ export async function setMemberSession(params: {
  * again after seven days without a request.
  */
 export async function getMemberSession(): Promise<MemberSessionData | null> {
-  const cookieValue = readSessionCookieValue();
+  const cookieValue = await readSessionCookieValue();
   if (!cookieValue) return null;
 
   const token = deserializeToken(cookieValue);
@@ -157,7 +158,7 @@ export async function getMemberSession(): Promise<MemberSessionData | null> {
 
   // Refresh the cookie lifetime so the ninety days count from last use.
   try {
-    writeSessionCookie(token);
+    await writeSessionCookie(token);
   } catch {
     // cookies() is read only outside a route handler or server action; the
     // database row above is still refreshed, which is what enforces FR-6.
@@ -173,7 +174,7 @@ export async function getMemberSession(): Promise<MemberSessionData | null> {
 
 /** Revokes the session in the database and clears the cookie. */
 export async function clearMemberSession(): Promise<void> {
-  const cookieValue = readSessionCookieValue();
+  const cookieValue = await readSessionCookieValue();
 
   if (cookieValue) {
     const token = deserializeToken(cookieValue);
@@ -185,5 +186,6 @@ export async function clearMemberSession(): Promise<void> {
     }
   }
 
-  cookies().delete(MEMBER_SESSION_COOKIE);
+  const store = await cookies();
+  store.delete(MEMBER_SESSION_COOKIE);
 }

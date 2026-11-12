@@ -5,8 +5,8 @@ generator client {
 
 datasource db {
   provider   = "postgresql"
-  url        = env("DATABASE_URL")   // pooled, pgbouncer=true&connection_limit=1
-  directUrl  = env("DIRECT_URL")     // unpooled, migrations only
+  url        = env("DATABASE_URL") // pooled, pgbouncer=true&connection_limit=1
+  directUrl  = env("DIRECT_URL") // unpooled, migrations only
   extensions = [vector]
 }
 
@@ -88,18 +88,32 @@ enum RefusalReason {
   STAFF_CONDUCT
 }
 
+enum HandoffReason {
+  NO_ANSWER
+  REFUSED_POLICY
+  MEMBER_REQUESTED
+}
+
 // ---------- gym and staff ----------
+//
+// EMAIL STORAGE RULES, applied to Gym, Staff and Member:
+// - stored lower case, never an empty string
+// - capped at 320 characters, the maximum length of an address (RFC 5321)
+// - unique per gym where the address is a sign in identifier
+// - verifiedAt is only set once the address has actually been confirmed
+// The CHECK constraints that enforce these rules live in the migrations,
+// because Prisma does not manage CHECK constraints.
 
 model Gym {
   id           String   @id @default(cuid())
-  name         String
-  timezone     String   @default("Africa/Lagos")
-  phone        String?  // gym contact number shown to members
-  email        String?  // gym contact email, stored lower case
-  address      String?
+  name         String   @db.VarChar(200)
+  timezone     String   @default("Africa/Lagos") @db.VarChar(64)
+  phone        String?  @db.VarChar(32) // gym contact number shown to members
+  email        String?  @db.VarChar(320) // gym contact email, stored lower case
+  address      String?  @db.VarChar(500)
   graceDays    Int      @default(3)
-  opensMinute  Int      @default(360)   // 06:00 local, for FR-19b
-  closesMinute Int      @default(1320)  // 22:00 local
+  opensMinute  Int      @default(360) // 06:00 local, for FR-19b
+  closesMinute Int      @default(1320) // 22:00 local
   createdAt    DateTime @default(now())
   updatedAt    DateTime @default(now()) @updatedAt
 
@@ -116,30 +130,38 @@ model MembershipPlan {
   gymId        String
   gym          Gym      @relation(fields: [gymId], references: [id])
   tier         Tier
-  priceKobo    Int      // positive
+  priceKobo    Int // positive
   durationDays Int
   activeFrom   DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+
+  payments        Payment[]
+  paymentAttempts PaymentAttempt[]
 
   @@unique([gymId, tier, activeFrom])
   @@index([gymId, tier])
+  @@index([gymId, activeFrom])
 }
 
 model Staff {
-  id             String    @id @default(cuid())
-  gymId          String
-  gym            Gym       @relation(fields: [gymId], references: [id])
-  name           String
-  role           StaffRole
-  email          String?   // staff sign in identifier, stored lower case
-  whatsappNumber String
-  passwordHash   String
-  active         Boolean   @default(true)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @default(now()) @updatedAt
+  id              String    @id @default(cuid())
+  gymId           String
+  gym             Gym       @relation(fields: [gymId], references: [id])
+  name            String    @db.VarChar(200)
+  role            StaffRole
+  email           String?   @db.VarChar(320) // staff sign in identifier, required when active, lower case
+  emailVerifiedAt DateTime?
+  whatsappNumber  String    @db.VarChar(32)
+  passwordHash    String    @db.VarChar(255)
+  active          Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now()) @updatedAt
 
+  sessions            StaffSession[]
   deskShifts          DeskShift[]
-  authoredVersions    CardVersion[] @relation("VersionAuthor")
-  approvedVersions    CardVersion[] @relation("VersionApprover")
+  authoredVersions    CardVersion[]       @relation("VersionAuthor")
+  approvedVersions    CardVersion[]       @relation("VersionApprover")
   issuedCodes         ActivationCode[]
   recordedCheckIns    CheckIn[]
   recordedPayments    Payment[]
@@ -147,23 +169,44 @@ model Staff {
   createdCheckInCodes CheckInCode[]
   membershipChanges   MembershipChange[]
   reviewedReports     WrongAnswerReport[]
+  answerAudits        AnswerAudit[]       @relation("AuditReviewer")
   handoffs            Handoff[]
 
   @@unique([gymId, email])
   @@index([gymId, active])
+  @@index([gymId, role, active])
+}
+
+// PRIVATE. Staff and owner credentials. This table is deliberately separate
+// from MemberSession: PRD 6.8 and 8.3 require a separate cookie and a separate
+// session table for staff and owner routes.
+model StaffSession {
+  id         String    @id @default(cuid())
+  staffId    String
+  staff      Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique @db.VarChar(255)
+  createdAt  DateTime  @default(now())
+  lastSeenAt DateTime  @default(now())
+  revokedAt  DateTime?
+
+  @@index([staffId, revokedAt])
 }
 
 model DeskShift {
-  id          String @id @default(cuid())
+  id          String   @id @default(cuid())
   gymId       String
-  gym         Gym    @relation(fields: [gymId], references: [id])
+  gym         Gym      @relation(fields: [gymId], references: [id])
   staffId     String
-  staff       Staff  @relation(fields: [staffId], references: [id])
-  dayOfWeek   Int    // 0 = Sunday
-  startMinute Int    // minutes from midnight, local
+  staff       Staff    @relation(fields: [staffId], references: [id])
+  dayOfWeek   Int // 0 = Sunday
+  startMinute Int // minutes from midnight, local
   endMinute   Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
 
+  @@unique([gymId, staffId, dayOfWeek, startMinute])
   @@index([gymId, dayOfWeek])
+  @@index([staffId, dayOfWeek])
 }
 
 // ---------- member: PRIVATE ROOT ----------
@@ -176,32 +219,43 @@ model DeskShift {
 // expiryDate, Gym.graceDays and cancelledAt. See FR-51.
 
 model Member {
-  id           String    @id @default(cuid())
-  gymId        String
-  gym          Gym       @relation(fields: [gymId], references: [id])
-  memberNumber String    // human readable, printed on the card
-  firstName    String
-  lastName     String
-  phone        String
-  email        String?   // contact only, never a login identifier on its own
-  dateOfBirth  DateTime? @db.Date
-  address      String?
-  emergencyContactName  String?
-  emergencyContactPhone String?
-  tier         Tier      @default(BASIC)
-  joinedAt     DateTime  @db.Date @default(now())
-  expiryDate   DateTime  @db.Date
-  cancelledAt  DateTime?
-  pinHash      String?   // Argon2id, see FR-3
-  deviceId     String?   // last bound device, see FR-4
-  activatedAt  DateTime?
-  privacyAcceptedAt DateTime?
+  id                    String    @id @default(cuid())
+  gymId                 String
+  gym                   Gym       @relation(fields: [gymId], references: [id])
+  memberNumber          String    @db.VarChar(32) // human readable, printed on the card
+  firstName             String    @db.VarChar(100)
+  lastName              String    @db.VarChar(100)
+  phone                 String    @db.VarChar(32)
+  email                 String?   @db.VarChar(320) // sign in identifier when present, lower case
+  emailVerifiedAt       DateTime?
+  dateOfBirth           DateTime? @db.Date
+  address               String?   @db.VarChar(500)
+  emergencyContactName  String?   @db.VarChar(200)
+  emergencyContactPhone String?   @db.VarChar(32)
+  tier                  Tier      @default(BASIC)
+  joinedAt              DateTime  @default(now()) @db.Date
+  expiryDate            DateTime  @db.Date
+  cancelledAt           DateTime?
+  pinHash               String?   @db.VarChar(255) // Argon2id, see FR-3
+  deviceId              String?   @db.VarChar(128) // last bound device, see FR-4
+  activatedAt           DateTime?
+  privacyAcceptedAt     DateTime?
+  // Self service profile. The desk row is created before the member has ever
+  // chosen a name, so the name is only "set" once she saves it here. Until
+  // profileCompletedAt is set the app never presents the desk placeholder as
+  // her name.
+  profileCompletedAt    DateTime?
+  // Profile picture, stored inline so no external bucket or writable folder is
+  // required. Capped at 2 MB and downscaled to 512 px by the browser first.
+  avatarMimeType        String?   @db.VarChar(50) // image/jpeg, image/png or image/webp
+  avatarData            Bytes?
+  avatarUpdatedAt       DateTime?
   // FR-7 wrong PIN lockout. Reset on every successful PIN entry.
-  failedPinAttempts  Int       @default(0)
-  pinFailedWindowStart DateTime?
-  pinLockedUntil     DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  failedPinAttempts     Int       @default(0)
+  pinFailedWindowStart  DateTime?
+  pinLockedUntil        DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   sessions           MemberSession[]
   activationCodes    ActivationCode[]
@@ -214,42 +268,49 @@ model Member {
   membershipChanges  MembershipChange[]
   handoffs           Handoff[]
   accessLogs         PrivateAccessLog[]
+  nameChanges        NameChange[]
 
   @@unique([gymId, memberNumber])
   @@unique([gymId, email])
   @@index([gymId, expiryDate])
+  @@index([gymId, cancelledAt])
+  @@index([gymId, lastName, firstName])
+  @@index([gymId, phone])
 }
 
 // PRIVATE. Fetched by exact member ID only.
 model MemberSession {
   id         String    @id @default(cuid())
   memberId   String
-  member     Member    @relation(fields: [memberId], references: [id])
-  tokenHash  String    @unique
-  deviceId   String
+  member     Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique @db.VarChar(255)
+  deviceId   String    @db.VarChar(128)
   createdAt  DateTime  @default(now())
   lastSeenAt DateTime  @default(now())
   revokedAt  DateTime?
 
   @@index([memberId, revokedAt])
+  @@index([deviceId, revokedAt])
 }
 
 // PRIVATE. Fetched by exact member ID only.
 model ActivationCode {
   id              String    @id @default(cuid())
   memberId        String
-  member          Member    @relation(fields: [memberId], references: [id])
-  codeHash        String    @unique
+  member          Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  codeHash        String    @unique @db.VarChar(255)
   issuedByStaffId String
   issuedBy        Staff     @relation(fields: [issuedByStaffId], references: [id])
-  remote          Boolean   @default(false)  // FR-5b
-  reason          String?
+  remote          Boolean   @default(false) // FR-5b
+  reason          String?   @db.VarChar(500)
   expiresAt       DateTime
   usedAt          DateTime?
   createdAt       DateTime  @default(now())
 
   @@index([memberId, createdAt])
-  @@index([expiresAt])   // nightly sweep: expired codes that were never used
+  @@index([memberId, remote, createdAt])
+  @@index([expiresAt]) // nightly sweep: expired codes that were never used
+  @@index([usedAt])
 }
 
 // ---------- shared records ----------
@@ -259,7 +320,7 @@ model Card {
   gymId              String
   gym                Gym          @relation(fields: [gymId], references: [id])
   category           CardCategory
-  title              String
+  title              String       @db.VarChar(200)
   minTier            Tier         @default(BASIC)
   status             CardStatus   @default(DRAFT)
   reviewIntervalDays Int          @default(30)
@@ -273,13 +334,14 @@ model Card {
 
   @@index([gymId, status])
   @@index([gymId, lastConfirmedAt])
+  @@index([gymId, category, status])
 }
 
 model CardVersion {
   id                String     @id @default(cuid())
   cardId            String
   card              Card       @relation("AllVersions", fields: [cardId], references: [id])
-  title             String
+  title             String     @db.VarChar(200)
   body              String
   minTier           Tier
   status            CardStatus @default(PENDING_APPROVAL)
@@ -290,11 +352,13 @@ model CardVersion {
   approvedAt        DateTime?
   rejectionNote     String?
   createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @default(now()) @updatedAt
 
   currentFor Card?       @relation("CurrentVersion")
   chunks     CardChunk[]
 
   @@index([cardId, status])
+  @@index([status, createdAt])
 }
 
 // SHARED. The only model with an embedding column.
@@ -303,17 +367,18 @@ model CardVersion {
 // Unsupported column, and the NOT NULL check constraint in section 10.1
 // means prisma.cardChunk.create() always fails. CI blocks those calls.
 model CardChunk {
-  id            String                       @id @default(cuid())
+  id            String                      @id @default(cuid())
   cardVersionId String
-  cardVersion   CardVersion                  @relation(fields: [cardVersionId], references: [id], onDelete: Cascade)
+  cardVersion   CardVersion                 @relation(fields: [cardVersionId], references: [id], onDelete: Cascade)
   chunkIndex    Int
   content       String
   category      CardCategory
   minTier       Tier
   embedding     Unsupported("vector(768)")?
-  createdAt     DateTime                     @default(now())
+  createdAt     DateTime                    @default(now())
 
   @@unique([cardVersionId, chunkIndex])
+  @@index([category, minTier])
 }
 
 // ---------- attendance ----------
@@ -323,21 +388,23 @@ model CheckInCode {
   gymId            String
   gym              Gym      @relation(fields: [gymId], references: [id])
   forDate          DateTime @db.Date
-  code             String   // four digits
+  code             String   @db.VarChar(4) // four digits
   createdByStaffId String?
   createdBy        Staff?   @relation(fields: [createdByStaffId], references: [id])
   createdAt        DateTime @default(now())
+  updatedAt        DateTime @default(now()) @updatedAt
 
   checkIns CheckIn[]
 
   @@unique([gymId, forDate])
+  @@index([forDate])
 }
 
 // PRIVATE. Fetched by exact member ID only.
 model CheckIn {
   id                String        @id @default(cuid())
   memberId          String
-  member            Member        @relation(fields: [memberId], references: [id])
+  member            Member        @relation(fields: [memberId], references: [id], onDelete: Cascade)
   checkInDate       DateTime      @db.Date
   checkedInAt       DateTime      @default(now())
   source            CheckInSource @default(CODE)
@@ -345,11 +412,12 @@ model CheckIn {
   checkInCode       CheckInCode?  @relation(fields: [checkInCodeId], references: [id])
   recordedByStaffId String?
   recordedBy        Staff?        @relation(fields: [recordedByStaffId], references: [id])
-  deviceId          String?       // for the burst check in FR-19c
+  deviceId          String?       @db.VarChar(128) // for the burst check in FR-19c
 
   @@unique([memberId, checkInDate])
-  @@index([memberId, checkInDate])
   @@index([checkedInAt])
+  @@index([deviceId, checkedInAt])
+  @@index([recordedByStaffId, checkedInAt])
 }
 
 // ---------- money ----------
@@ -364,12 +432,12 @@ model CheckIn {
 model LedgerEntry {
   id                String          @id @default(cuid())
   memberId          String
-  member            Member          @relation(fields: [memberId], references: [id])
+  member            Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)
   type              LedgerEntryType
-  amountKobo        Int             // see sign convention above
+  amountKobo        Int // see sign convention above
   occurredAt        DateTime
-  periodLabel       String?         // "July 2026"
-  description       String
+  periodLabel       String?         @db.VarChar(32) // "July 2026"
+  description       String          @db.VarChar(500)
   paymentId         String?         @unique
   payment           Payment?        @relation(fields: [paymentId], references: [id])
   recordedByStaffId String?
@@ -377,65 +445,90 @@ model LedgerEntry {
   createdAt         DateTime        @default(now())
 
   @@index([memberId, occurredAt])
+  @@index([memberId, type, occurredAt])
 }
 
 // PRIVATE. Fetched by exact member ID only.
 model Payment {
-  id                String         @id @default(cuid())
+  id                String          @id @default(cuid())
   memberId          String
-  member            Member         @relation(fields: [memberId], references: [id])
-  amountKobo        Int            // positive
-  feeKobo           Int            @default(0)
+  member            Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  planId            String? // the plan this payment buys, when it is a renewal
+  plan              MembershipPlan? @relation(fields: [planId], references: [id], onDelete: Restrict)
+  amountKobo        Int // positive
+  feeKobo           Int             @default(0)
   channel           PaymentChannel
   purpose           PaymentPurpose
-  status            PaymentStatus  @default(SUCCESS)
-  reference         String         @unique
-  gatewayReference  String?        @unique
+  status            PaymentStatus   @default(SUCCESS)
+  reference         String          @unique @db.VarChar(255)
+  gatewayReference  String?         @unique @db.VarChar(255)
   paidAt            DateTime
   recordedByStaffId String?
-  recordedBy        Staff?         @relation(fields: [recordedByStaffId], references: [id])
+  recordedBy        Staff?          @relation(fields: [recordedByStaffId], references: [id])
   rawWebhook        Json?
-  createdAt         DateTime       @default(now())
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @default(now()) @updatedAt
 
   ledgerEntry LedgerEntry?
   attempt     PaymentAttempt?
 
   @@index([memberId, paidAt])
-  @@index([channel, paidAt])   // FR-47c same day entry measurement
+  @@index([channel, paidAt]) // FR-47c same day entry measurement
+  @@index([planId])
 }
 
 // PRIVATE. Fetched by exact member ID only.
 model PaymentAttempt {
-  id             String         @id @default(cuid())
+  id             String          @id @default(cuid())
   memberId       String
-  member         Member         @relation(fields: [memberId], references: [id])
-  reference      String         @unique
-  idempotencyKey String         @unique
+  member         Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  planId         String? // the plan being purchased, when it is a renewal
+  plan           MembershipPlan? @relation(fields: [planId], references: [id], onDelete: Restrict)
+  reference      String          @unique @db.VarChar(255)
+  idempotencyKey String          @unique @db.VarChar(255)
   amountKobo     Int
   purpose        PaymentPurpose
-  status         PaymentStatus  @default(PENDING)
-  failureReason  String?
-  initiatedAt    DateTime       @default(now())
+  status         PaymentStatus   @default(PENDING)
+  failureReason  String?         @db.VarChar(500)
+  initiatedAt    DateTime        @default(now())
   resolvedAt     DateTime?
-  paymentId      String?        @unique
-  payment        Payment?       @relation(fields: [paymentId], references: [id])
+  paymentId      String?         @unique
+  payment        Payment?        @relation(fields: [paymentId], references: [id])
+  updatedAt      DateTime        @default(now()) @updatedAt
 
   @@index([memberId, status])
   @@index([status, initiatedAt])
+  @@index([memberId, initiatedAt])
+  @@index([planId])
 }
 
 // PRIVATE. Fetched by exact member ID only.
 model MembershipChange {
   id               String   @id @default(cuid())
   memberId         String
-  member           Member   @relation(fields: [memberId], references: [id])
-  field            String   // "tier" or "expiryDate"
-  oldValue         String
-  newValue         String
-  reason           String   // "renewal payment REF" or "manual edit"
+  member           Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  field            String   @db.VarChar(32) // "tier" or "expiryDate"
+  oldValue         String   @db.VarChar(200)
+  newValue         String   @db.VarChar(200)
+  reason           String   @db.VarChar(500) // "renewal payment REF" or "manual edit"
   changedByStaffId String?
   changedBy        Staff?   @relation(fields: [changedByStaffId], references: [id])
   changedAt        DateTime @default(now())
+
+  @@index([memberId, changedAt])
+  @@index([memberId, field, changedAt])
+}
+
+// PRIVATE. One row per full name change the member makes in the app. Exists
+// only to enforce the four changes per rolling two month limit and to leave an
+// audit trail of what she was called before. Never shown to anyone else.
+model NameChange {
+  id        String   @id @default(cuid())
+  memberId  String
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  oldName   String   @db.VarChar(201) // first + last, as it was
+  newName   String   @db.VarChar(201) // first + last, as she set it
+  changedAt DateTime @default(now())
 
   @@index([memberId, changedAt])
 }
@@ -445,15 +538,16 @@ model MembershipChange {
 // PRIVATE. The detector behind G-5. sessionMemberId must always equal
 // targetMemberId. The nightly sweep asserts this.
 model PrivateAccessLog {
-  id             String   @id @default(cuid())
+  id              String   @id @default(cuid())
   sessionMemberId String
-  targetMemberId String
-  member         Member   @relation(fields: [targetMemberId], references: [id])
-  functionName   String
-  accessedAt     DateTime @default(now())
+  targetMemberId  String
+  member          Member   @relation(fields: [targetMemberId], references: [id], onDelete: Cascade)
+  functionName    String   @db.VarChar(100)
+  accessedAt      DateTime @default(now())
 
   @@index([accessedAt])
   @@index([targetMemberId, accessedAt])
+  @@index([sessionMemberId, accessedAt])
 }
 
 // PRIVATE for member facing reads. Visible to the owner with member
@@ -462,13 +556,13 @@ model PrivateAccessLog {
 model QuestionLog {
   id             String          @id @default(cuid())
   memberId       String
-  member         Member          @relation(fields: [memberId], references: [id])
+  member         Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)
   tierAtAsk      Tier
   questionText   String
-  intent         String
+  intent         String          @db.VarChar(50)
   outcome        QuestionOutcome
   refusalReason  RefusalReason?
-  refusedBy      String?         // "RULES" or "MODEL"
+  refusedBy      String?         @db.VarChar(20) // "RULES" or "MODEL"
   cardVersionIds String[]
   topScore       Float?
   answerText     String?
@@ -481,14 +575,15 @@ model QuestionLog {
 
   @@index([memberId, askedAt])
   @@index([outcome, askedAt])
+  @@index([askedAt])
 }
 
 model WrongAnswerReport {
   id                String      @id @default(cuid())
   questionLogId     String
-  questionLog       QuestionLog @relation(fields: [questionLogId], references: [id])
+  questionLog       QuestionLog @relation(fields: [questionLogId], references: [id], onDelete: Cascade)
   memberId          String
-  member            Member      @relation(fields: [memberId], references: [id])
+  member            Member      @relation(fields: [memberId], references: [id], onDelete: Cascade)
   note              String?
   reportedAt        DateTime    @default(now())
   reviewedAt        DateTime?
@@ -497,30 +592,37 @@ model WrongAnswerReport {
   resolution        String?
 
   @@index([reviewedAt, reportedAt])
+  @@index([memberId, reportedAt])
 }
 
 // The owner's weekly sample. FR-49b. Feeds the audited figure in M-5.
 model AnswerAudit {
-  id            String      @id @default(cuid())
-  questionLogId String
-  questionLog   QuestionLog @relation(fields: [questionLogId], references: [id])
-  correct       Boolean
-  note          String?
-  auditedAt     DateTime    @default(now())
+  id                String      @id @default(cuid())
+  questionLogId     String
+  questionLog       QuestionLog @relation(fields: [questionLogId], references: [id], onDelete: Cascade)
+  reviewedByStaffId String?
+  reviewedBy        Staff?      @relation("AuditReviewer", fields: [reviewedByStaffId], references: [id], onDelete: Restrict)
+  correct           Boolean
+  note              String?
+  auditedAt         DateTime    @default(now())
 
   @@index([auditedAt])
+  @@index([reviewedByStaffId, auditedAt])
 }
 
 model Handoff {
-  id             String      @id @default(cuid())
+  id             String        @id @default(cuid())
   questionLogId  String
-  questionLog    QuestionLog @relation(fields: [questionLogId], references: [id])
+  questionLog    QuestionLog   @relation(fields: [questionLogId], references: [id], onDelete: Cascade)
   memberId       String
-  member         Member      @relation(fields: [memberId], references: [id])
+  member         Member        @relation(fields: [memberId], references: [id], onDelete: Cascade)
   staffId        String
-  staff          Staff       @relation(fields: [staffId], references: [id])
-  openedWhatsapp Boolean     @default(false)
-  createdAt      DateTime    @default(now())
+  staff          Staff         @relation(fields: [staffId], references: [id])
+  reason         HandoffReason @default(NO_ANSWER)
+  openedWhatsapp Boolean       @default(false)
+  createdAt      DateTime      @default(now())
 
   @@index([staffId, createdAt])
+  @@index([memberId, createdAt])
+  @@index([reason, createdAt])
 }

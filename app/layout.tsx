@@ -41,13 +41,25 @@ const themeInitScript = `
 })();
 `;
 
+/**
+ * Temporary diagnostics: a stamp that changes whenever the server compiles,
+ * so a stale browser tab can be told apart from a stale build.
+ * Remove once the profile work is confirmed on the member's own screen.
+ */
+const BUILD_STAMP = `profile-v2 ${new Date().toISOString().slice(0, 16).replace('T', ' ')}Z`;
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={dmSans.className} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={dmSans.className}
+      data-build={BUILD_STAMP}
+      suppressHydrationWarning
+    >
       <head>
         <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#161d1a" media="(prefers-color-scheme: dark)" />
@@ -57,7 +69,28 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/icon.svg" />
         <link rel="apple-touch-icon" href="/icon.svg" />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        {process.env.NODE_ENV !== 'production' ? (
+          <div
+            data-build-chip={BUILD_STAMP}
+            style={{
+              position: 'fixed',
+              left: 8,
+              bottom: 8,
+              zIndex: 2147483647,
+              padding: '2px 6px',
+              borderRadius: 4,
+              background: 'rgba(0,0,0,0.75)',
+              color: '#fff',
+              font: '11px/1.4 ui-monospace, monospace',
+              pointerEvents: 'none',
+            }}
+          >
+            {BUILD_STAMP}
+          </div>
+        ) : null}
+      </body>
     </html>
   );
 }

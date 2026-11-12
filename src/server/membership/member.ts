@@ -1,6 +1,7 @@
 import { prisma } from '../db/client';
 import crypto from 'crypto';
 import { hash as argonHash, verify as argonVerify } from '@node-rs/argon2';
+import { NAME_CHANGE_WINDOW_MS, summarizeNameChanges } from '../private/profile';
 
 export interface MemberRecordDto {
   id: string;
@@ -18,6 +19,15 @@ export interface MemberRecordDto {
   membershipStatus: MembershipStatus;
   joinedAt: Date;
   expiryDate: Date;
+  /** True once the member has set her own name in the app. */
+  profileCompleted: boolean;
+  hasAvatar: boolean;
+  avatarUpdatedAt?: Date;
+  /** Name changes used inside the rolling two month window. */
+  nameChangesUsed: number;
+  nameChangesRemaining: number;
+  /** When the next change is allowed, only when the limit is reached. */
+  nameChangeWindowEndsAt?: Date;
 }
 
 export type MembershipStatus = 'ACTIVE' | 'GRACE' | 'EXPIRED' | 'CANCELLED';
@@ -139,9 +149,16 @@ type MemberWithGym = {
   expiryDate: Date;
   cancelledAt: Date | null;
   gym: { graceDays: number; timezone: string };
+  profileCompletedAt?: Date | null;
+  avatarUpdatedAt?: Date | null;
+  nameChanges?: { changedAt: Date }[];
 };
 
 export function toMemberRecord(member: MemberWithGym, now: Date = new Date()): MemberRecordDto {
+  // Activation and login do not load name changes; the dashboard reads them
+  // through getMemberProfile, which always does.
+  const nameChanges = summarizeNameChanges(member.nameChanges ?? [], now);
+
   return {
     id: member.id,
     memberNumber: member.memberNumber,
@@ -158,11 +175,25 @@ export function toMemberRecord(member: MemberWithGym, now: Date = new Date()): M
     membershipStatus: effectiveStatus(member, member.gym, now),
     joinedAt: member.joinedAt,
     expiryDate: member.expiryDate,
+    profileCompleted: Boolean(member.profileCompletedAt),
+    hasAvatar: Boolean(member.avatarUpdatedAt),
+    avatarUpdatedAt: member.avatarUpdatedAt ?? undefined,
+    nameChangesUsed: nameChanges.used,
+    nameChangesRemaining: nameChanges.remaining,
+    nameChangeWindowEndsAt: nameChanges.windowEndsAt ?? undefined,
   };
 }
 
+const EMAIL_MAX_LENGTH = 320;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
 function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
+}
+
+/** Mirrors the CHECK constraint on Member.email in the database. */
+function isValidEmail(value: string): boolean {
+  return value.length <= EMAIL_MAX_LENGTH && EMAIL_PATTERN.test(value);
 }
 
 function splitFullName(fullName: string): { firstName: string; lastName: string } {
@@ -247,6 +278,10 @@ export async function activateMember(params: {
     typeof params.email === 'string' && params.email.trim()
       ? normalizeEmail(params.email)
       : null;
+
+  if (email && !isValidEmail(email)) {
+    return { ok: false, error: 'Enter a valid email address, or leave it blank.' };
+  }
 
   const name =
     typeof params.fullName === 'string' && params.fullName.trim()

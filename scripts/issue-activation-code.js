@@ -12,7 +12,7 @@
  * Options
  *   --name            First and last name. Required for a new member.
  *   --phone           Phone number. Required for a new member.
- *   --email           Optional contact email.
+ *   --email           Optional sign in and contact email.
  *   --dob             Date of birth, YYYY-MM-DD.
  *   --address         Postal or home address.
  *   --emergency-name  Emergency contact full name.
@@ -98,8 +98,15 @@ function generateCode() {
   return code;
 }
 
+const EMAIL_MAX_LENGTH = 320;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
 function normalizeEmail(value) {
-  return value.trim().toLowerCase();
+  const email = value.trim().toLowerCase();
+  if (email.length > EMAIL_MAX_LENGTH || !EMAIL_PATTERN.test(email)) {
+    throw new Error('--email must be a single valid email address.');
+  }
+  return email;
 }
 
 function splitName(fullName) {
@@ -146,7 +153,7 @@ async function uniqueMemberNumber(gymId) {
 
 async function issuingStaff() {
   const existing = await prisma.staff.findFirst({
-    where: { gymId: GYM_ID, role: 'OWNER', active: true },
+    where: { gymId: GYM_ID, role: 'OWNER' },
     orderBy: { createdAt: 'asc' },
   });
   if (existing) return existing;
@@ -154,6 +161,8 @@ async function issuingStaff() {
   // The staff app (and staff authentication) is not built yet. This row only
   // satisfies ActivationCode.issuedByStaffId and cannot be used to sign in to
   // anything, because no staff login exists and the hash is not a valid one.
+  // It is inactive on purpose: the database requires an email on every active
+  // staff row, and this placeholder has no real address to store.
   return prisma.staff.create({
     data: {
       gymId: GYM_ID,
@@ -161,6 +170,7 @@ async function issuingStaff() {
       role: 'OWNER',
       whatsappNumber: '',
       passwordHash: '!staff-login-not-implemented!',
+      active: false,
     },
   });
 }
@@ -177,6 +187,9 @@ async function main() {
   }
   if (!Number.isFinite(days) || days < 1 || days > 3650) {
     throw new Error('--days must be a whole number between 1 and 3650.');
+  }
+  if (args.remote === true && (typeof args.reason !== 'string' || !args.reason.trim())) {
+    throw new Error('--reason is required when a code is issued remotely (FR-5b).');
   }
 
   const gym = await prisma.gym.upsert({
@@ -241,6 +254,10 @@ async function main() {
   };
 
   const expiryDate = new Date(startOfTodayUtc().getTime() + days * 24 * 60 * 60 * 1000);
+
+  if (joinedAt && joinedAt.getTime() > expiryDate.getTime()) {
+    throw new Error('--joined cannot be after the membership expiry date.');
+  }
 
   const member = existingMember
     ? await prisma.member.update({
