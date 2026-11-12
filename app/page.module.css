@@ -1475,10 +1475,29 @@
   cursor: not-allowed;
 }
 
-.nameHint {
+.nameEditWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.nameEditDangerHint {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1, 6px);
   font-family: var(--typography-body-small-font-family);
   font-size: var(--typography-body-small-font-size);
-  color: var(--color-on-surface-variant);
+  font-weight: 500;
+  line-height: var(--typography-body-small-line-height);
+  color: var(--color-error);
+}
+
+.nameEditDangerIcon {
+  flex: 0 0 auto;
+  width: 0.95rem;
+  height: 0.95rem;
+  stroke: var(--color-error);
 }
 
 .nameError {

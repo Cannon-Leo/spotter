@@ -691,36 +691,62 @@ export default function SpotterHome() {
                   <div className={styles.userMeta}>
                     <div className={styles.userNameRow}>
                       {isEditingName ? (
-                        <form className={styles.nameEditForm} onSubmit={handleNameSave}>
-                          <label htmlFor="profile-name-edit" className={styles.srOnly}>
-                            Full name
-                          </label>
-                          <input
-                            id="profile-name-edit"
-                            ref={nameEditInputRef}
-                            className={styles.nameEditInput}
-                            value={nameDraft}
-                            onChange={(event) => setNameDraft(event.target.value)}
-                            maxLength={200}
-                            autoComplete="name"
-                            disabled={nameSaving}
-                          />
-                          <button
-                            type="submit"
-                            className={styles.nameEditSave}
-                            disabled={nameSaving}
-                          >
-                            {nameSaving ? 'Saving…' : 'Save'}
-                          </button>
-                          <button
-                            type="button"
-                            className={styles.nameEditCancel}
-                            onClick={() => setIsEditingName(false)}
-                            disabled={nameSaving}
-                          >
-                            Cancel
-                          </button>
-                        </form>
+                        <div className={styles.nameEditWrap}>
+                          <form className={styles.nameEditForm} onSubmit={handleNameSave}>
+                            <label htmlFor="profile-name-edit" className={styles.srOnly}>
+                              Full name
+                            </label>
+                            <input
+                              id="profile-name-edit"
+                              ref={nameEditInputRef}
+                              className={styles.nameEditInput}
+                              value={nameDraft}
+                              onChange={(event) => setNameDraft(event.target.value)}
+                              maxLength={200}
+                              autoComplete="name"
+                              disabled={nameSaving}
+                            />
+                            <button
+                              type="submit"
+                              className={styles.nameEditSave}
+                              disabled={nameSaving}
+                            >
+                              {nameSaving ? 'Saving…' : 'Save'}
+                            </button>
+                            <button
+                              type="button"
+                              className={styles.nameEditCancel}
+                              onClick={() => {
+                                setIsEditingName(false);
+                                setNameError(null);
+                              }}
+                              disabled={nameSaving}
+                            >
+                              Cancel
+                            </button>
+                          </form>
+                          <p className={styles.nameEditDangerHint} role="note">
+                            <svg
+                              className={styles.nameEditDangerIcon}
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              aria-hidden="true"
+                            >
+                              <circle cx="12" cy="12" r="10" />
+                              <line x1="12" y1="8" x2="12" y2="12" />
+                              <line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                            <span>
+                              {nameChangesRemaining > 0
+                                ? `${nameChangesRemaining} of ${NAME_CHANGE_LIMIT} name changes remaining in this 2-month period.`
+                                : `Maximum limit reached (${NAME_CHANGE_LIMIT} changes per 2-month period). Next available: ${nameWindowEnd ?? 'next period'}.`}
+                            </span>
+                          </p>
+                        </div>
                       ) : (
                         <>
                           <h1
@@ -762,11 +788,6 @@ export default function SpotterHome() {
                       )}
                     </div>
 
-                    <p className={styles.nameHint}>
-                      {nameChangesRemaining > 0
-                        ? `${nameChangesRemaining} of ${NAME_CHANGE_LIMIT} name changes remaining in this 2-month period.`
-                        : `Maximum limit reached (4 changes per 2-month period). Next available: ${nameWindowEnd ?? 'next period'}.`}
-                    </p>
                     {nameError && (
                       <p className={styles.nameError} role="alert">
                         {nameError}
