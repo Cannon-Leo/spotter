@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMemberSession } from '@/server/auth/session';
 import { getMemberAvatar, saveMemberAvatar } from '@/server/private/profile';
+import { avatarUploadSchema, formatZodError } from '@/server/validation/schemas';
 
 export const dynamic = 'force-dynamic';
-
-/** Roughly 2 MB of image once base64 has expanded it. Checked before decoding. */
-const MAX_DATA_URL_LENGTH = 4 * 1024 * 1024;
 
 /**
  * Serves the signed in member's own picture.
@@ -68,23 +66,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Send the picture as JSON.' }, { status: 400 });
     }
 
-    const dataUrl = (body as { dataUrl?: unknown } | null)?.dataUrl;
-
-    if (typeof dataUrl !== 'string' || dataUrl.length === 0) {
-      return NextResponse.json({ error: 'Choose a picture first.' }, { status: 400 });
-    }
-    if (dataUrl.length > MAX_DATA_URL_LENGTH) {
-      return NextResponse.json(
-        { error: 'That picture is larger than 2 MB. Choose a smaller one.' },
-        { status: 413 }
-      );
+    const parsed = avatarUploadSchema.safeParse(body);
+    if (!parsed.success) {
+      const firstIssue = parsed.error.issues[0];
+      const status = firstIssue?.code === 'too_big' ? 413 : 400;
+      return NextResponse.json({ error: formatZodError(parsed.error) }, { status });
     }
 
-    const match = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=\s]+)$/.exec(dataUrl);
-    if (!match) {
-      return NextResponse.json({ error: 'Use a JPEG, PNG or WebP picture.' }, { status: 400 });
-    }
-
+    const { dataUrl } = parsed.data;
+    const match = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=\s]+)$/.exec(dataUrl)!;
     const [, mimeType, base64] = match;
     const data = Buffer.from(base64.replace(/\s+/g, ''), 'base64');
 

@@ -10,7 +10,7 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "next lint",
-    "test": "node --test tests/profile-rules.test.mjs",
+    "test": "node --experimental-strip-types --test tests/profile-rules.test.mjs tests/zod-schemas.test.mjs",
     "type-check": "tsc --noEmit",
     "build-tokens": "node scripts/build-tokens.js",
     "postinstall": "prisma generate",
@@ -25,7 +25,8 @@
     "next": "^16.4.6",
     "nodemailer": "^10.2.1",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^20.16.10",

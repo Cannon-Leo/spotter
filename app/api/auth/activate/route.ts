@@ -2,6 +2,7 @@ import { NextRequest, NextResponse, after } from 'next/server';
 import { setMemberSession } from '@/server/auth/session';
 import { activateMember } from '@/server/membership/member';
 import { sendWelcomeEmail } from '@/server/mail/mailer';
+import { activateSchema, formatZodError } from '@/server/validation/schemas';
 import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
@@ -9,19 +10,30 @@ export const dynamic = 'force-dynamic';
 /**
  * FR-1 to FR-4. The browser sends the one time activation code issued by the
  * desk, the privacy acceptance, the chosen four digit PIN and the device ID.
+ * Input is strictly validated by Zod before processing.
  * The member row already exists; this endpoint never creates one.
  */
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { code, pin, privacyAccepted, email, fullName, deviceId } = body ?? {};
-
-    if (privacyAccepted !== true) {
+    let rawBody: unknown;
+    try {
+      rawBody = await req.json();
+    } catch {
       return NextResponse.json(
-        { error: 'Accept the privacy notice before setting your PIN.' },
+        { error: 'Invalid JSON request body.' },
         { status: 400 }
       );
     }
+
+    const parsed = activateSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: formatZodError(parsed.error) },
+        { status: 400 }
+      );
+    }
+
+    const { code, pin, privacyAccepted, email, fullName, deviceId } = parsed.data;
 
     const boundDeviceId =
       typeof deviceId === 'string' && deviceId.trim()
@@ -32,8 +44,8 @@ export async function POST(req: NextRequest) {
       code,
       pin,
       privacyAccepted,
-      email: typeof email === 'string' ? email : undefined,
-      fullName: typeof fullName === 'string' ? fullName : undefined,
+      email,
+      fullName,
       deviceId: boundDeviceId,
     });
 

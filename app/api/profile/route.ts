@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMemberSession } from '@/server/auth/session';
 import { updateMemberName } from '@/server/private/profile';
+import { formatZodError, profileNameSchema } from '@/server/validation/schemas';
 
 export const dynamic = 'force-dynamic';
 
 /**
  * Sets the signed in member's own full name.
+ * Validates with Zod before updating.
  *
  * The member ID always comes from the session (FR-15). The body may only carry
  * a name; any id it tries to send is ignored. The four changes per two month
@@ -29,8 +31,15 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'Send the new name as JSON.' }, { status: 400 });
     }
 
-    const fullName = (body as { fullName?: unknown } | null)?.fullName;
-    const result = await updateMemberName(session.memberId, fullName);
+    const parsed = profileNameSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: formatZodError(parsed.error) },
+        { status: 400 }
+      );
+    }
+
+    const result = await updateMemberName(session.memberId, parsed.data.fullName);
 
     if (!result.ok) {
       return NextResponse.json(

@@ -1,39 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { setMemberSession } from '@/server/auth/session';
 import { authenticateMember } from '@/server/membership/member';
+import { formatZodError, loginSchema } from '@/server/validation/schemas';
 import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
 
 /**
  * FR-6, FR-7. A member signs in with her member number (or the email the desk
- * recorded) and her four digit PIN. Nothing is issued when the PIN is wrong:
- * there is no fallback member and no fabricated session.
+ * recorded) and her four digit PIN. Validated with Zod before authentication.
+ * Nothing is issued when the PIN is wrong: there is no fallback member and no
+ * fabricated session.
  */
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { identifier, email, pin, deviceId } = body ?? {};
-
-    // `email` is still accepted so an older client cannot break, but the
-    // identifier is the only value used to find the member.
-    const loginIdentifier =
-      typeof identifier === 'string' && identifier.trim()
-        ? identifier.trim()
-        : typeof email === 'string'
-          ? email.trim()
-          : '';
-
-    if (!loginIdentifier) {
+    let rawBody: unknown;
+    try {
+      rawBody = await req.json();
+    } catch {
       return NextResponse.json(
-        { error: 'Enter your member number or email address.' },
+        { error: 'Invalid JSON request body.' },
         { status: 400 }
       );
     }
 
-    if (typeof pin !== 'string' || !/^\d{4}$/.test(pin.trim())) {
-      return NextResponse.json({ error: 'Enter your four digit PIN.' }, { status: 400 });
+    const parsed = loginSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: formatZodError(parsed.error) },
+        { status: 400 }
+      );
     }
+
+    const { identifier: loginIdentifier, pin, deviceId } = parsed.data;
 
     const result = await authenticateMember({ identifier: loginIdentifier, pin });
 
