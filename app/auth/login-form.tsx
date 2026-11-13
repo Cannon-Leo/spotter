@@ -4,7 +4,7 @@ import React, { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from '../auth.module.css';
-import { formatIdentifierInput, getOrCreateDeviceId } from './view';
+import { formatIdentifierInput, formatPinInput, getOrCreateDeviceId } from './view';
 
 function CautionIcon() {
   return (
@@ -59,7 +59,8 @@ export default function LoginForm() {
       return;
     }
 
-    if (!PIN_PATTERN.test(pin.trim())) {
+    const trimmedPin = formatPinInput(pin);
+    if (!PIN_PATTERN.test(trimmedPin)) {
       setTouched((prev) => ({ ...prev, pin: true }));
       pinRef.current?.focus();
       setError('Please enter your four digit PIN.');
@@ -73,7 +74,7 @@ export default function LoginForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           identifier: formatIdentifierInput(identifier).trim(),
-          pin: pin.trim(),
+          pin: trimmedPin,
           deviceId: getOrCreateDeviceId(),
         }),
       });
@@ -172,10 +173,13 @@ export default function LoginForm() {
                 placeholder="Enter 4-digit PIN"
                 value={pin}
                 onChange={(e) => {
-                  setPin(e.target.value.replace(/\D/g, '').slice(0, 4));
+                  setPin(formatPinInput(e.target.value));
                   if (error) setError('');
                 }}
-                onBlur={() => markTouched('pin')}
+                onBlur={() => {
+                  setPin((p) => formatPinInput(p));
+                  markTouched('pin');
+                }}
                 ref={pinRef}
                 className={`${styles.passwordInput} ${pinEmpty || pinInvalid ? styles.inputInvalid : ''}`}
                 autoComplete="current-password"

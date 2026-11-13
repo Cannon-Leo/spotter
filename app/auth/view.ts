@@ -22,6 +22,14 @@ export function formatEmailInput(value: string): string {
 }
 
 /**
+ * PINs are exactly four digits. Whitespace is trimmed and non-digit characters
+ * are stripped so pasted inputs with accidental spaces (" 1234 ") are sanitized.
+ */
+export function formatPinInput(value: string): string {
+  return value.trim().replace(/\D/g, '').slice(0, 4);
+}
+
+/**
  * One field accepts either a member number or an email. Only the email form is
  * case insensitive, so the value is lowered only once it contains an "@".
  * Members have no letter case preference otherwise: a member number is digits.

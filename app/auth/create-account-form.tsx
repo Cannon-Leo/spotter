@@ -4,7 +4,7 @@ import React, { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from '../auth.module.css';
-import { formatEmailInput, getOrCreateDeviceId } from './view';
+import { formatEmailInput, formatPinInput, getOrCreateDeviceId } from './view';
 
 function CautionIcon() {
   return (
@@ -136,7 +136,7 @@ export default function CreateAccountForm() {
         body: JSON.stringify({
           code: code.trim().toUpperCase(),
           email: formatEmailInput(email),
-          pin: pinTrimmed,
+          pin: formatPinInput(pin),
           privacyAccepted: acceptedPrivacy,
           deviceId: getOrCreateDeviceId(),
         }),
@@ -262,10 +262,13 @@ export default function CreateAccountForm() {
                 placeholder="••••"
                 value={pin}
                 onChange={(e) => {
-                  setPin(e.target.value.replace(/\D/g, '').slice(0, 4));
+                  setPin(formatPinInput(e.target.value));
                   if (error) setError('');
                 }}
-                onBlur={() => markTouched('pin')}
+                onBlur={() => {
+                  setPin((p) => formatPinInput(p));
+                  markTouched('pin');
+                }}
                 ref={pinRef}
                 className={`${styles.passwordInput} ${pinError ? styles.inputInvalid : ''}`}
                 autoComplete="new-password"
