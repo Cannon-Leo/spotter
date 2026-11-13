@@ -10,7 +10,7 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "next lint",
-    "test": "node --experimental-strip-types --test tests/profile-rules.test.mjs tests/zod-schemas.test.mjs",
+    "test": "node --experimental-strip-types --test tests/profile-rules.test.mjs tests/zod-schemas.test.mjs tests/email-normalization.test.mjs",
     "type-check": "tsc --noEmit",
     "build-tokens": "node scripts/build-tokens.js",
     "postinstall": "prisma generate",
